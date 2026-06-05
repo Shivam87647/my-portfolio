@@ -705,20 +705,24 @@ export default function App() {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  // Disable body scroll when case study drawer is active to prevent scroll leak
+  // Disable body scroll when case study drawer or terminal overlay is active to prevent scroll leak
   useEffect(() => {
-    if (selectedProject) {
+    const isLocked = selectedProject || isTerminalOpen;
+    if (isLocked) {
+      document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = '6px'; // Prevents layout shift from scrollbar removal
+      document.body.style.paddingRight = '8px'; // Prevents layout shift from scrollbar removal
     } else {
+      document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
     }
     return () => {
+      document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
     };
-  }, [selectedProject]);
+  }, [selectedProject, isTerminalOpen]);
 
   // Pure React Header, Scrollspy, & Navigation Pill Interactions (100% jQuery-Free)
   useEffect(() => {
