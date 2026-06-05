@@ -635,7 +635,6 @@ export default function App() {
 
   // Pure React Scroll & Sliding Active Indicator states
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isHeroScrolled, setIsHeroScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('about');
   const [scrollProgress, setScrollProgress] = useState(0);
   const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 });
@@ -655,7 +654,6 @@ export default function App() {
 
   const canvasRef = useRef(null);
   const visualPanelRef = useRef(null);
-  const sectionOffsetsRef = useRef([]);
   const cardRectsRef = useRef(new WeakMap());
   
   // Custom interactive refs
@@ -724,92 +722,112 @@ export default function App() {
 
   // Pure React Header, Scrollspy, & Navigation Pill Interactions (100% jQuery-Free)
   useEffect(() => {
-    const cacheSectionOffsets = () => {
-      const sections = document.querySelectorAll('section[id]');
-      const offsets = [];
-      sections.forEach(sec => {
-        const rect = sec.getBoundingClientRect();
-        offsets.push({
-          id: sec.id,
-          top: rect.top + window.scrollY,
-          height: sec.offsetHeight
-        });
-      });
-      sectionOffsetsRef.current = offsets;
-    };
-
-    // Let page layout settle first
-    const initTimeout = setTimeout(cacheSectionOffsets, 1000);
-    window.addEventListener('resize', cacheSectionOffsets, { passive: true });
-
     const handleScroll = () => {
       const scrollTop = window.scrollY;
       
       // 1. Toggle scrolled navbar class
       setIsScrolled(scrollTop > 40);
-      setIsHeroScrolled(scrollTop > 100);
 
-      // 2. Scrollspy: Use cached section coordinates
-      const scrollPosition = scrollTop + 160;
-      let currentSectionId = '';
-      const cachedOffsets = sectionOffsetsRef.current;
+      // 2. Scrollspy: Calculate which section occupies the viewport the most
       const winHeight = window.innerHeight;
-      const docHeight = document.documentElement.scrollHeight;
+      const navSectionIds = ['about', 'skills', 'projects', 'credentials', 'contact'];
+      let currentSectionId = '';
 
-      for (let i = 0; i < cachedOffsets.length; i++) {
-        const sec = cachedOffsets[i];
-        if (scrollPosition >= sec.top && scrollPosition < sec.top + sec.height) {
-          currentSectionId = sec.id;
-          break;
-        }
-      }
+      if (scrollTop < 80) {
+        currentSectionId = 'about';
+      } else {
+        let maxVisibleHeight = -1;
+        let bestSectionId = '';
 
-      if (scrollTop + winHeight >= docHeight - 80) {
-        currentSectionId = 'contact';
+        navSectionIds.forEach(id => {
+          const sec = document.getElementById(id);
+          if (!sec) return;
+          const rect = sec.getBoundingClientRect();
+          
+          // Calculate intersection heights in the viewport
+          const visibleTop = Math.max(0, rect.top);
+          const visibleBottom = Math.min(winHeight, rect.bottom);
+          const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+
+          if (visibleHeight > maxVisibleHeight) {
+            maxVisibleHeight = visibleHeight;
+            bestSectionId = id;
+          }
+        });
+
+        currentSectionId = bestSectionId || 'about';
       }
 
       if (currentSectionId) {
         setActiveSection(currentSectionId);
       }
-
-      // 3. Scroll progress aligned to global document page scroll (100% layout-thrashing free)
-      const scrollableHeight = docHeight - winHeight;
-      const scrollPercent = scrollableHeight > 0 ? (scrollTop / scrollableHeight) * 100 : 0;
-      setScrollProgress(scrollPercent);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    // Trigger scroll immediately on load
+    // Trigger scroll immediately on load to set correct initial states
     const triggerTimeout = setTimeout(handleScroll, 100);
 
     return () => {
-      clearTimeout(initTimeout);
       clearTimeout(triggerTimeout);
-      window.removeEventListener('resize', cacheSectionOffsets);
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
-  // Slide sliding capsule pill automatically when activeSection changes
+  // Slide sliding capsule pill & update scroll progress bar to align with active links
   useEffect(() => {
     let activeId = activeSection;
     let rId;
+
     const updatePill = () => {
-      if (activeId === 'contact') {
+      // If at the very top of the page (Hero section), reset indicators
+      if (window.scrollY < 100) {
         setPillStyle(prev => ({ ...prev, opacity: 0 }));
+        setScrollProgress(0);
         return;
       }
+
+      if (activeId === 'contact') {
+        setPillStyle(prev => ({ ...prev, opacity: 0 }));
+        setScrollProgress(100);
+        return;
+      }
+
       const activeLink = document.querySelector(`.nav-links a[href="#${activeId}"]`);
-      if (activeLink) {
+      const navbar = navbarRef.current;
+      
+      if (activeLink && navbar) {
+        // Slide capsule pill
         setPillStyle({
           left: activeLink.offsetLeft,
           width: activeLink.offsetWidth,
           opacity: 1
         });
+
+        // Fill scroll progress bar exactly up to the right edge of the active link
+        const linkRect = activeLink.getBoundingClientRect();
+        const navRect = navbar.getBoundingClientRect();
+        const rightEdge = linkRect.right - navRect.left;
+        const progressPercent = Math.min(100, Math.max(0, (rightEdge / navRect.width) * 100));
+        setScrollProgress(progressPercent);
       }
     };
+
+    const handleResizeOrScroll = () => {
+      cancelAnimationFrame(rId);
+      rId = requestAnimationFrame(updatePill);
+    };
+
+    // Update initially
     rId = requestAnimationFrame(updatePill);
-    return () => cancelAnimationFrame(rId);
+
+    window.addEventListener('resize', handleResizeOrScroll, { passive: true });
+    window.addEventListener('scroll', handleResizeOrScroll, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(rId);
+      window.removeEventListener('resize', handleResizeOrScroll);
+      window.removeEventListener('scroll', handleResizeOrScroll);
+    };
   }, [activeSection]);
 
   const handleNavLinkMouseEnter = (e) => {
@@ -900,9 +918,35 @@ export default function App() {
     // Scroll-triggered animations via dynamic IntersectionObserver + GSAP
     const observerOptions = {
       root: null,
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
+      threshold: 0.05,
+      rootMargin: '0px 0px -30px 0px'
     };
+
+    // Observe each portfolio container
+    const sections = document.querySelectorAll('section.section');
+
+    // Hide all scroll-triggered elements initially so they are completely sided/invisible
+    sections.forEach(sec => {
+      if (sec.classList.contains('hero-section')) return; // Skip hero section as it's animated by intro timeline
+      
+      const subtitle = sec.querySelector('.section-subtitle');
+      const title = sec.querySelector('.section-title');
+      const cards = sec.querySelectorAll('.bento-card, .glass-panel, .project-card-wrap, .credentials-grid > *, .contact-bento-layout > *');
+
+      if (subtitle) {
+        gsap.set(subtitle, { x: -80, opacity: 0 });
+      }
+      if (title) {
+        gsap.set(title, { x: 80, opacity: 0 });
+      }
+      if (cards.length) {
+        cards.forEach((card, idx) => {
+          // Alternate slide directions: even indices from left (-150px), odd indices from right (150px)
+          const sideOffset = idx % 2 === 0 ? -150 : 150;
+          gsap.set(card, { x: sideOffset, opacity: 0, scale: 0.95 });
+        });
+      }
+    });
 
     const sectionObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -912,29 +956,33 @@ export default function App() {
           const title = section.querySelector('.section-title');
           const cards = section.querySelectorAll('.bento-card, .glass-panel, .project-card-wrap, .credentials-grid > *, .contact-bento-layout > *');
 
-          // Staggered reveal vectors
+          // Staggered reveal vectors coming from the sides
           if (subtitle) {
-            gsap.fromTo(subtitle, { y: 25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' });
+            gsap.to(subtitle, { x: 0, opacity: 1, duration: 0.8, ease: 'power4.out' });
           }
           if (title) {
-            gsap.fromTo(title, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1, delay: 0.1, ease: 'power3.out' });
+            gsap.to(title, { x: 0, opacity: 1, duration: 0.8, delay: 0.04, ease: 'power4.out' });
           }
           
           if (cards.length) {
-            gsap.fromTo(cards, 
-              { y: 45, opacity: 0, scale: 0.96 }, 
-              { y: 0, opacity: 1, scale: 1, duration: 1.1, stagger: 0.12, delay: 0.2, ease: 'power3.out' }
-            );
+            gsap.to(cards, {
+              x: 0,
+              opacity: 1,
+              scale: 1,
+              duration: 0.95,
+              stagger: 0.08,
+              delay: 0.08,
+              ease: 'power4.out',
+              clearProps: 'transform,opacity' // Clears inline styles to let native hover transforms/opacities work!
+            });
           }
 
           // Disconnect observer for this section once animated
-          sectionObserver.unobserve(entry.target);
+          sectionObserver.unobserve(section);
         }
       });
     }, observerOptions);
 
-    // Observe each portfolio container
-    const sections = document.querySelectorAll('section.section');
     sections.forEach(sec => {
       sectionObserver.observe(sec);
     });
@@ -1068,12 +1116,14 @@ export default function App() {
     let angleX = 0;
     let angleY = 0;
     let animId;
+    let isIntersecting = true;
 
     const fov = 320;
     const centerX = width / 2;
     const centerY = height / 2;
 
     const render = () => {
+      if (!isIntersecting) return;
       ctx.clearRect(0, 0, width, height);
 
       angleX += (targetRotX - angleX) * 0.07;
@@ -1147,11 +1197,28 @@ export default function App() {
       animId = requestAnimationFrame(render);
     };
 
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        isIntersecting = entry.isIntersecting;
+        if (isIntersecting) {
+          cancelAnimationFrame(animId);
+          animId = requestAnimationFrame(render);
+        }
+      });
+    }, { threshold: 0 });
+
+    if (panel) {
+      observer.observe(panel);
+    }
+
     render();
 
     return () => {
       window.removeEventListener('resize', handleResize);
       panel.removeEventListener('mousemove', handleMouseMove);
+      if (panel) {
+        observer.unobserve(panel);
+      }
       cancelAnimationFrame(animId);
     };
   }, []);
@@ -1205,8 +1272,8 @@ export default function App() {
         activeMagnet.style.transform = `translate3d(${pullX}px, ${pullY}px, 0) scale(1.03)`;
         activeMagnet.style.transition = 'none';
       } else {
-        followerX += (mouseX - followerX) * 0.16;
-        followerY += (mouseY - followerY) * 0.16;
+        followerX += (mouseX - followerX) * 0.22;
+        followerY += (mouseY - followerY) * 0.22;
       }
 
       follower.style.transform = `translate3d(${followerX}px, ${followerY}px, 0)`;
@@ -1296,8 +1363,8 @@ export default function App() {
   // Elastic spring transitions for active skill details selector bento
   useEffect(() => {
     gsap.fromTo('.skills-details-wrapper > *', 
-      { y: 15, opacity: 0, scale: 0.98 },
-      { y: 0, opacity: 1, scale: 1, duration: 0.65, stagger: 0.08, ease: 'power4.out' }
+      { y: 12, opacity: 0, scale: 0.99 },
+      { y: 0, opacity: 1, scale: 1, duration: 0.45, stagger: 0.04, ease: 'power4.out' }
     );
   }, [activeSkillId]);
 
@@ -1694,7 +1761,7 @@ export default function App() {
 
         {/* Fluid Canvas Panel */}
         <div className="hero-visual-panel" ref={visualPanelRef}>
-          <canvas className={`particles-canvas ${isHeroScrolled ? 'expanded-bg' : ''}`} ref={canvasRef} />
+          <canvas className="particles-canvas" ref={canvasRef} />
           
           <div 
             className="visual-profile-card"

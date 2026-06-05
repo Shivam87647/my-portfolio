@@ -50,6 +50,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -328,6 +329,7 @@ body::after {
   max-width: 1200px;
   margin: 0 auto;
   position: relative;
+  scroll-margin-top: 100px;
 }
 
 .section-subtitle {
@@ -520,18 +522,6 @@ body::after {
   pointer-events: none;
   transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), filter 1.2s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;
-}
-
-.particles-canvas.expanded-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw !important;
-  height: 100vh !important;
-  z-index: -2;
-  opacity: 0.18;
-  transform: scale(1.45);
-  filter: blur(1.5px);
 }
 
 /* Luxury card with floating overlay details */
@@ -1549,10 +1539,10 @@ body::after {
 
 /* 1. Trailing Magnetic Liquid Custom Cursors */
 .custom-cursor {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   background: var(--accent);
-  box-shadow: 0 0 10px var(--accent);
+  box-shadow: 0 0 12px var(--accent), 0 0 4px var(--accent);
   border-radius: 50%;
   position: fixed;
   top: 0;
@@ -1564,10 +1554,11 @@ body::after {
 }
 
 .custom-cursor-follower {
-  width: 32px;
-  height: 32px;
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  background: rgba(168, 85, 247, 0.01);
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid rgba(168, 85, 247, 0.65);
+  background: rgba(168, 85, 247, 0.03);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.15);
   border-radius: 50%;
   position: fixed;
   top: 0;
@@ -1583,11 +1574,11 @@ body::after {
 }
 
 .custom-cursor-follower.hovering {
-  width: 58px;
-  height: 58px;
-  background: rgba(99, 102, 241, 0.08);
-  border-color: var(--primary);
-  box-shadow: 0 0 20px var(--primary-glow);
+  width: 60px;
+  height: 60px;
+  background: rgba(99, 102, 241, 0.14);
+  border: 2px solid var(--primary);
+  box-shadow: 0 0 25px var(--primary-glow);
 }
 
 .custom-cursor-follower.hovering::after {
@@ -1602,14 +1593,14 @@ body::after {
 
 .custom-cursor-follower.clicking {
   transform: translate3d(-50%, -50%, 0) scale(0.65);
-  border-color: var(--accent);
-  background: rgba(168, 85, 247, 0.18);
+  border: 2px solid var(--accent);
+  background: rgba(168, 85, 247, 0.28);
 }
 
 .custom-cursor-follower.magnetic {
   border-radius: 12px;
-  border-color: var(--accent);
-  background: rgba(168, 85, 247, 0.03);
+  border: 2.5px solid var(--accent);
+  background: rgba(168, 85, 247, 0.08);
 }
 
 @media (pointer: coarse) {
