@@ -864,62 +864,62 @@ export default function App() {
   // GSAP Cinematic Reveal Animations
   useEffect(() => {
     // Cinematic timeline with premium ease mappings
-    const tl = gsap.timeline({ defaults: { ease: 'power4.out', duration: 1.2 } });
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out', duration: 1.4 } });
 
     // Initial offsets to prevent layout shifting
-    gsap.set('.navbar-wrapper', { y: -100, opacity: 0 });
-    gsap.set('.hero-tagline', { y: 30, opacity: 0 });
-    gsap.set('.hero-main-title', { y: 40, opacity: 0 });
-    gsap.set('.hero-role-carousel', { y: 25, opacity: 0 });
-    gsap.set('.hero-desc', { y: 30, opacity: 0 });
-    gsap.set('.hero-ctas > *', { y: 30, opacity: 0 });
-    gsap.set('.visual-profile-card', { scale: 0.85, opacity: 0, rotationY: -15 });
+    gsap.set('.navbar-wrapper', { y: -60, opacity: 0 });
+    gsap.set('.hero-tagline', { y: 25, opacity: 0 });
+    gsap.set('.hero-main-title', { y: 35, opacity: 0 });
+    gsap.set('.hero-role-carousel', { y: 20, opacity: 0 });
+    gsap.set('.hero-desc', { y: 25, opacity: 0 });
+    gsap.set('.hero-ctas > *', { y: 25, opacity: 0 });
+    gsap.set('.visual-profile-card', { scale: 0.92, opacity: 0, rotationY: -8 });
 
     // Cinematic execution flow
     tl.to('.navbar-wrapper', {
       y: 0,
       opacity: 1,
-      duration: 1
+      duration: 1.2
     })
     .to('.hero-tagline', {
       y: 0,
       opacity: 1,
-      duration: 0.8
-    }, '-=0.5')
+      duration: 0.95
+    }, '-=0.8')
     .to('.hero-main-title', {
       y: 0,
       opacity: 1,
-      duration: 1
-    }, '-=0.6')
+      duration: 1.15
+    }, '-=0.85')
     .to('.hero-role-carousel', {
       y: 0,
       opacity: 1,
-      duration: 0.8
-    }, '-=0.7')
+      duration: 0.95
+    }, '-=0.95')
     .to('.hero-desc', {
       y: 0,
       opacity: 1,
-      duration: 0.9
-    }, '-=0.6')
+      duration: 1.05
+    }, '-=0.85')
     .to('.hero-ctas > *', {
       y: 0,
       opacity: 1,
-      stagger: 0.15,
-      duration: 0.8
-    }, '-=0.7')
+      stagger: 0.12,
+      duration: 0.95
+    }, '-=0.9')
     .to('.visual-profile-card', {
       scale: 1,
       opacity: 1,
       rotationY: 0,
-      duration: 1.5,
-      ease: 'elastic.out(1, 0.75)'
-    }, '-=1.1');
+      duration: 1.6,
+      ease: 'elastic.out(1, 0.85)'
+    }, '-=1.2');
 
     // Scroll-triggered animations via dynamic IntersectionObserver + GSAP
     const observerOptions = {
       root: null,
-      threshold: 0.05,
-      rootMargin: '0px 0px -30px 0px'
+      threshold: 0.02,
+      rootMargin: '0px 0px -20px 0px'
     };
 
     // Observe each portfolio container
@@ -934,16 +934,16 @@ export default function App() {
       const cards = sec.querySelectorAll('.bento-card, .glass-panel, .project-card-wrap, .credentials-grid > *, .contact-bento-layout > *');
 
       if (subtitle) {
-        gsap.set(subtitle, { x: -80, opacity: 0 });
+        gsap.set(subtitle, { y: 25, opacity: 0 });
       }
       if (title) {
-        gsap.set(title, { x: 80, opacity: 0 });
+        gsap.set(title, { y: 35, opacity: 0 });
       }
       if (cards.length) {
         cards.forEach((card, idx) => {
-          // Alternate slide directions: even indices from left (-150px), odd indices from right (150px)
-          const sideOffset = idx % 2 === 0 ? -150 : 150;
-          gsap.set(card, { x: sideOffset, opacity: 0, scale: 0.95 });
+          // Alternate slide directions with subtle professional offset (60px)
+          const sideOffset = idx % 2 === 0 ? -60 : 60;
+          gsap.set(card, { x: sideOffset, opacity: 0, scale: 0.97 });
         });
       }
     });
@@ -958,10 +958,10 @@ export default function App() {
 
           // Staggered reveal vectors coming from the sides
           if (subtitle) {
-            gsap.to(subtitle, { x: 0, opacity: 1, duration: 0.8, ease: 'power4.out' });
+            gsap.to(subtitle, { y: 0, opacity: 1, duration: 1.1, ease: 'power3.out' });
           }
           if (title) {
-            gsap.to(title, { x: 0, opacity: 1, duration: 0.8, delay: 0.04, ease: 'power4.out' });
+            gsap.to(title, { y: 0, opacity: 1, duration: 1.25, delay: 0.04, ease: 'power3.out' });
           }
           
           if (cards.length) {
@@ -969,10 +969,10 @@ export default function App() {
               x: 0,
               opacity: 1,
               scale: 1,
-              duration: 0.95,
-              stagger: 0.08,
+              duration: 1.25,
+              stagger: 0.12,
               delay: 0.08,
-              ease: 'power4.out',
+              ease: 'power3.out',
               clearProps: 'transform,opacity' // Clears inline styles to let native hover transforms/opacities work!
             });
           }
@@ -1651,13 +1651,13 @@ export default function App() {
 
         if (dx !== 0 || dy !== 0) {
           gsap.fromTo(card, 
-            { x: dx, y: dy, scale: 0.95 },
-            { x: 0, y: 0, scale: 1, duration: 0.65, ease: 'power4.out', clearProps: 'transform' }
+            { x: dx, y: dy, scale: 0.97 },
+            { x: 0, y: 0, scale: 1, duration: 0.75, ease: 'power3.out', clearProps: 'transform' }
           );
         } else {
           gsap.fromTo(card,
-            { scale: 0.75, opacity: 0 },
-            { scale: 1, opacity: 1, duration: 0.55, ease: 'power3.out', clearProps: 'transform' }
+            { scale: 0.92, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.65, ease: 'power3.out', clearProps: 'transform' }
           );
         }
       });
