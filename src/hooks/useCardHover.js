@@ -1,7 +1,19 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 
 export default function useCardHover() {
   const cardRectsRef = useRef(new WeakMap());
+
+  useEffect(() => {
+    const invalidateCache = () => {
+      cardRectsRef.current = new WeakMap();
+    };
+    window.addEventListener('scroll', invalidateCache, { passive: true });
+    window.addEventListener('resize', invalidateCache, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', invalidateCache);
+      window.removeEventListener('resize', invalidateCache);
+    };
+  }, []);
 
   const handleCardMouseMove = useCallback((e) => {
     const card = e.currentTarget;
