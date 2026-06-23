@@ -735,7 +735,7 @@ export default function App() {
       // 2. Scrollspy: Calculate which section occupies the viewport the most
       const winHeight = window.innerHeight;
       const navSectionIds = ['about', 'skills', 'projects', 'credentials', 'contact'];
-      let currentSectionId = '';
+      let currentSectionId;
 
       if (scrollTop < 80) {
         currentSectionId = 'about';
@@ -2104,6 +2104,7 @@ export default function App() {
               <a 
                 href="https://www.linkedin.com/in/shivam-singh-shekhawat-14826638a/" 
                 target="_blank" 
+                rel="noopener noreferrer"
                 className="contact-badge-item"
                 onMouseMove={handleCardMouseMove}
                 onMouseLeave={handleCardMouseLeave}
@@ -2118,6 +2119,7 @@ export default function App() {
               <a 
                 href="https://github.com/Shivam87647" 
                 target="_blank" 
+                rel="noopener noreferrer"
                 className="contact-badge-item"
                 onMouseMove={handleCardMouseMove}
                 onMouseLeave={handleCardMouseLeave}
@@ -2202,8 +2204,8 @@ export default function App() {
           ========================================== */}
       <footer className="footer">
         <div className="footer-socials">
-          <a href="https://github.com/Shivam87647" target="_blank" className="footer-social-btn">Github</a>
-          <a href="https://www.linkedin.com/in/shivam-singh-shekhawat-14826638a/" target="_blank" className="footer-social-btn">LinkedIn</a>
+          <a href="https://github.com/Shivam87647" target="_blank" rel="noopener noreferrer" className="footer-social-btn">Github</a>
+          <a href="https://www.linkedin.com/in/shivam-singh-shekhawat-14826638a/" target="_blank" rel="noopener noreferrer" className="footer-social-btn">LinkedIn</a>
           <a href="mailto:shekhawatshivamsingh3@gmail.com" className="footer-social-btn">Email</a>
         </div>
         <p className="footer-copy">
