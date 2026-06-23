@@ -1,623 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 
-// ==========================================
-// PORTFOLIO DATABASES
-// ==========================================
-
-const PROJECTS_DATA = [
-  {
-    id: 'proj-ecommerce',
-    title: 'Scalable Full-Stack E-Commerce Platform',
-    category: 'Full Stack',
-    date: '04/2026 - Present',
-    shortDesc: 'A fully scalable, comprehensive e-commerce environment featuring secure JWT sessions, Redux cart states, and MongoDB pipelines.',
-    tags: ['Next.js', 'Express.js', 'MongoDB', 'Redux', 'Tailwind CSS'],
-    color: 'var(--primary)',
-    liveUrl: 'https://github.com/Shivam87647/e-commerce-fs',
-    githubUrl: 'https://github.com/Shivam87647/e-commerce-fs',
-    bullets: [
-      'Engineered responsive storefront with Next.js Server Side Rendering (SSR) for high-performance content loading.',
-      'Designed REST API microservices in Node.js/Express for robust product catalog routing and user wishlist management.',
-      'Constructed MongoDB document models with indexes to optimize lookup times under high query volumes.',
-      'Integrated Redux Toolkit for clean client-side state persistence across product sheets, bags, and checkout pipelines.'
-    ],
-    challenge: 'Reconciling rapid page hydration speeds with large, dynamically updating product catalogs and real-time checkout synchronizations.',
-    impact: [
-      'Cut page load times by 48% via Next.js server-side static rendering optimizations.',
-      'Reduced database query latencies by 35% using compound indexing strategies in MongoDB.',
-      'Sustained 100% state accuracy during high-volume cart items addition.'
-    ]
-  },
-  {
-    id: 'proj-goonj',
-    title: 'Goonj - Responsive NGO Portal',
-    category: 'Frontend',
-    date: '04/2026 - 04/2026',
-    shortDesc: 'A visually stunning modern UI for an NGO platform to showcase global initiatives, donation cards, and organizational impacts.',
-    tags: ['React.js', 'Tailwind CSS', 'Framer Animations', 'Dynamic Forms'],
-    color: 'var(--accent)',
-    liveUrl: 'https://github.com/Shivam87647',
-    githubUrl: 'https://github.com/Shivam87647',
-    bullets: [
-      'Developed a fluid, responsive landing page using component-driven React.js, optimizing component loading speeds.',
-      'Calibrated customized Tailwind utility styles, applying sleek dark-mode panels and interactive backdrop blurs.',
-      'Constructed interactive forms with detailed validation to collect volunteer submissions and feedback.',
-      'Optimized core search queries, ensuring seamless cross-device compatibility across standard mobile formats.'
-    ],
-    challenge: 'Crafting highly customizable, responsive layout sections and interactive donation widgets that adapt to mobile viewports without sacrificing the premium visual depth.',
-    impact: [
-      'Achieved a perfect mobile usability score across all common tablet and phone dimensions.',
-      'Reduced initial CSS bundle footprint by 40% through strict Tailwind utility configuration.',
-      'Implemented robust form validators that eliminated invalid volunteer entries.'
-    ]
-  },
-  {
-    id: 'proj-myntra',
-    title: 'Pixel-Accurate Myntra Desktop Interface',
-    category: 'UI & Clone',
-    date: '03/2026 - 04/2026',
-    shortDesc: 'A premium frontend clone of the Myntra platform, recreating complex visual components and navigation details.',
-    tags: ['HTML5', 'CSS3', 'JavaScript', 'Responsive Grid'],
-    color: 'var(--primary)',
-    liveUrl: 'https://github.com/Shivam87647',
-    githubUrl: 'https://github.com/Shivam87647',
-    bullets: [
-      'Built a desktop-optimized landing clone replicating core header listings, dynamic banners, and product grids.',
-      'Engineered custom transition hooks to recreate slide-out navigation panels and responsive dropdown lists.',
-      'Structured clean JavaScript scripts for client-side search indexing and interactive filter parameters.',
-      'Applied layout specs resulting in pixel-perfect representation of product cards and bag counters.'
-    ],
-    challenge: 'Replicating highly nested CSS grid listings and precise dynamic dropdown overlays with pure semantic structures.',
-    impact: [
-      'Achieved pixel-perfect visual compliance against production desktop mocks.',
-      'Engineered lightweight dropdown overlays with zero external library overhead.',
-      'Optimized CSS selectors, cutting rendering reflow overhead by 20%.'
-    ]
-  },
-  {
-    id: 'proj-blinkit',
-    title: 'Dynamic Blinkit Fast-Delivery Replica',
-    category: 'UI & Clone',
-    date: '02/2026 - 03/2026',
-    shortDesc: 'A frontend clone of Blinkit featuring dynamic categories selection, shopping bag counts, and interactive APIs.',
-    tags: ['React.js', 'JavaScript', 'API Integration', 'Context API'],
-    color: 'var(--accent)',
-    liveUrl: 'https://github.com/Shivam87647',
-    githubUrl: 'https://github.com/Shivam87647',
-    bullets: [
-      'Developed interactive product matrices with categories switching to replicate lightning-fast delivery UI.',
-      'Integrated mock JSON databases via custom React hooks to simulate live products stock rendering.',
-      'Utilized Context API to handle cart calculations, updating product tallies and sub-total pricing in real-time.',
-      'Styled fluid layouts using modern CSS modules to adapt seamlessly across mobile views.'
-    ],
-    challenge: 'Syncing complex cart calculations, sub-total pricing variables, and item stock quantities across multiple separated visual sections without prop drilling.',
-    impact: [
-      'Synchronized multi-section item updates in under 2ms using React Context architectures.',
-      'Designed modular product matrices that render dynamically based on clean JSON models.',
-      'Ensured full usability across major modern mobile web browsers.'
-    ]
-  },
-  {
-    id: 'proj-figma',
-    title: 'Figma to High-Fidelity Web Conversion',
-    category: 'UI & Clone',
-    date: '01/2026 - 02/2026',
-    shortDesc: 'Pixel-perfect single page layout constructed directly from design files using responsive Bootstrap structures.',
-    tags: ['HTML5', 'Bootstrap 5', 'CSS Transitions', 'Pixel Perfect'],
-    color: 'var(--primary)',
-    liveUrl: 'https://github.com/Shivam87647',
-    githubUrl: 'https://github.com/Shivam87647',
-    bullets: [
-      'Parsed raw Figma visual tokens, applying them into reusable semantic structures.',
-      'Implemented clean Bootstrap flex grids, cutting layout styling development overhead in half.',
-      'Coded micro-animations and glowing border hover states for actionable sections.',
-      'Ensured full cross-browser compatibility across Safari, Chrome, Edge, and mobile web clients.'
-    ],
-    challenge: 'Extracting nested flex coordinates from raw design specs and translating them into fluid, cross-browser compliant Bootstrap variables.',
-    impact: [
-      'Delivered pixel-perfect conversion, matching typography sizes and bounding box heights exactly.',
-      'Cut layout CSS lines by 60% by leveraging native Bootstrap variables.',
-      'Flawless cross-browser performance validated across all major engines.'
-    ]
-  }
-];
-
-const SKILLS_DATA = [
-  { 
-    id: 'react',
-    label: 'React.js / Next.js', 
-    percent: 90, 
-    desc: 'Expertise in server-side rendering (SSR), hydration stages, component composition patterns, hooks structures, and optimized virtual DOM updates.',
-    projects: ['Scalable Full-Stack E-Commerce Platform', 'Goonj - Responsive NGO Portal', 'Dynamic Blinkit Fast-Delivery Replica'],
-    level: 'Advanced Master'
-  },
-  { 
-    id: 'js',
-    label: 'JavaScript (ES6+)', 
-    percent: 88, 
-    desc: 'Deep core logic proficiencies in asynchronous execution pipelines, event loops, closure scopes, array operations, and DOM manipulation scripts.',
-    projects: ['Pixel-Accurate Myntra Desktop Interface', 'Dynamic Blinkit Fast-Delivery Replica'],
-    level: 'Advanced Core'
-  },
-  { 
-    id: 'mongodb',
-    label: 'MongoDB Database', 
-    percent: 80, 
-    desc: 'Familiarity with Document storage models, compound indexes optimization, aggregation pipelines, schema designing, and high-performance querying.',
-    projects: ['Scalable Full-Stack E-Commerce Platform'],
-    level: 'Intermediate Specialist'
-  },
-  { 
-    id: 'node',
-    label: 'Express.js & Node.js', 
-    percent: 82, 
-    desc: 'Building REST API microservices, handling middleware logic, secure JSON Web Token (JWT) rotation schemes, and database pooling configurations.',
-    projects: ['Scalable Full-Stack E-Commerce Platform'],
-    level: 'Intermediate Specialist'
-  },
-  { 
-    id: 'tailwind',
-    label: 'Tailwind CSS', 
-    percent: 92, 
-    desc: 'Designing premium visual guidelines using responsive utility utilities, HSL theme custom tokens, backdrop-filter blurs, and organic CSS transforms.',
-    projects: ['Scalable Full-Stack E-Commerce Platform', 'Goonj - Responsive NGO Portal', 'Dynamic Blinkit Fast-Delivery Replica'],
-    level: 'Advanced Master'
-  },
-  { 
-    id: 'htmlcss',
-    label: 'HTML5 & CSS3', 
-    percent: 95, 
-    desc: 'Recreating pixel-perfect layout wireframes, high-end micro-interactions, CSS animation loops, keyframe vectors, and accessibility elements.',
-    projects: ['Pixel-Accurate Myntra Desktop Interface', 'Figma to High-Fidelity Web Conversion'],
-    level: 'Expert Craftsman'
-  },
-  { 
-    id: 'bootstrap',
-    label: 'Bootstrap 5', 
-    percent: 85, 
-    desc: 'Utilizing responsive grid containers, column spans, flex positioning utilities, and reusable component packages for rapid wireframe conversions.',
-    projects: ['Figma to High-Fidelity Web Conversion'],
-    level: 'Advanced Core'
-  },
-  { 
-    id: 'git',
-    label: 'Git & GitHub', 
-    percent: 86, 
-    desc: 'Secure repository branching methods, commit standards compliance, team git collaboration workflows, and continuous actions pipelines.',
-    projects: ['Scalable Full-Stack E-Commerce Platform', 'Goonj - Responsive NGO Portal'],
-    level: 'Advanced Core'
-  }
-];
-
-const CREDENTIALS_DATA = [
-  {
-    title: 'Generative AI Mastermind Program',
-    provider: 'Hands-on AI Cohort Mastery',
-    date: '01/2026 - 01/2026',
-    desc: 'Intensive 48-hour program covering prompt engineering pipelines, LLM fine-tuning schemas, and building AI tools.'
-  },
-  {
-    title: 'Web Development enhanced with Gen AI',
-    provider: 'Modern Workflow Systems Training',
-    date: '10/2025 - Present',
-    desc: 'Integrating AI assistants into full-stack development, optimizing debugging speeds, and rapid prototyping workflows.'
-  }
-];
-
-const ROLES_POOL = ['Full Stack Web Developer', 'BCA Student @ VGU', 'MERN Stack Specialist', 'AI-Assisted Web Craftsman'];
-
-// ==========================================
-// SVG HELPER FUNCTIONS
-// ==========================================
-
-const renderSkillIcon = (id) => {
-  switch (id) {
-    case 'react':
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="skill-icon-svg">
-          <circle cx="12" cy="12" r="2" fill="currentColor" />
-          <path d="M12 3c-4.97 0-9 1.57-9 3.5S7.03 10 12 10s9-1.57 9-3.5S16.97 3 12 3z" transform="rotate(30 12 12)" />
-          <path d="M12 3c-4.97 0-9 1.57-9 3.5S7.03 10 12 10s9-1.57 9-3.5S16.97 3 12 3z" transform="rotate(90 12 12)" />
-          <path d="M12 3c-4.97 0-9 1.57-9 3.5S7.03 10 12 10s9-1.57 9-3.5S16.97 3 12 3z" transform="rotate(150 12 12)" />
-        </svg>
-      );
-    case 'js':
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="skill-icon-svg">
-          <rect x="3" y="3" width="18" height="18" rx="2" />
-          <path d="M15 9h-2a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V9z" />
-          <path d="M9 9v4a2 2 0 0 1-2 2h-1" />
-        </svg>
-      );
-    case 'mongodb':
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="skill-icon-svg">
-          <path d="M12 2v20M8 5a6 6 0 0 1 8 0c2 3-1 9-4 13-3-4-6-10-4-13a6 6 0 0 1 0 0z" />
-        </svg>
-      );
-    case 'node':
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="skill-icon-svg">
-          <path d="M12 2L2 7v10l10 5 10-5V7L12 2z" />
-          <circle cx="12" cy="12" r="3" />
-          <line x1="12" y1="2" x2="12" y2="9" />
-          <line x1="12" y1="15" x2="12" y2="22" />
-        </svg>
-      );
-    case 'tailwind':
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="skill-icon-svg">
-          <path d="M12 3c.132 0 .263 0 .393.003a8.995 8.995 0 0 1 8.19 5.86c.642 1.884.28 3.966-.968 5.56L12 21a8.995 8.995 0 0 1-8.19-5.86c-.642-1.884-.28-3.966.968-5.56L12 3z" />
-          <path d="M12 7c.066 0 .132 0 .197.001a4.498 4.498 0 0 1 4.095 2.93c.32 1.256.096 2.644-.484 3.707L12 17a4.498 4.498 0 0 1-4.095-2.93c-.32-1.256-.096-2.644.484-3.707L12 7z" />
-        </svg>
-      );
-    case 'htmlcss':
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="skill-icon-svg">
-          <path d="M12 22L4 18.5 2 3h20l-2 15.5L12 22z" />
-          <path d="M8 8h8M8 12h8M10 16h4" />
-        </svg>
-      );
-    case 'bootstrap':
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="skill-icon-svg">
-          <rect x="4" y="4" width="16" height="16" rx="3" />
-          <path d="M9 8h4a2 2 0 0 1 2 2v1a1.5 1.5 0 0 1-1.5 1.5A1.5 1.5 0 0 1 15 14v1a2 2 0 0 1-2 2H9V8z" />
-          <line x1="12" y1="12" x2="9" y2="12" />
-        </svg>
-      );
-    case 'git':
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="skill-icon-svg">
-          <circle cx="18" cy="18" r="3" />
-          <circle cx="6" cy="6" r="3" />
-          <circle cx="6" cy="18" r="3" />
-          <path d="M18 15V9a4 4 0 0 0-4-4H9" />
-          <line x1="6" y1="9" x2="6" y2="15" />
-        </svg>
-      );
-    default:
-      return null;
-  }
-};
-
-const renderProjectVisual = (id) => {
-  switch (id) {
-    case 'proj-ecommerce':
-      return (
-        <svg width="100%" height="100%" viewBox="0 0 300 100" className="proj-svg-render">
-          <defs>
-            <linearGradient id="ecommerceGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.4"/>
-              <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.08"/>
-            </linearGradient>
-          </defs>
-          <rect x="10" y="10" width="280" height="80" rx="8" fill="url(#ecommerceGrad)" stroke="rgba(255,255,255,0.03)"/>
-          
-          <g transform="translate(45, 45)">
-            <circle cx="0" cy="0" r="14" fill="rgba(255, 255, 255, 0.05)" stroke="white" strokeWidth="1" strokeDasharray="3 2"/>
-            <path d="M-6 -6 H-2 L1 2 H7 L9 -4 H0" fill="none" stroke="var(--primary)" strokeWidth="1.5"/>
-            <circle cx="2" cy="5" r="1.5" fill="var(--primary)"/>
-            <circle cx="6" cy="5" r="1.5" fill="var(--primary)"/>
-          </g>
-          
-          <g transform="translate(150, 45)">
-            <rect x="-24" y="-14" width="48" height="28" rx="4" fill="rgba(255, 255, 255, 0.05)" stroke="var(--accent)" strokeWidth="1.5"/>
-            <text x="0" y="4" fill="white" fontSize="8" fontWeight="bold" fontFamily="var(--font-mono)" textAnchor="middle">JWT</text>
-          </g>
-          
-          <g transform="translate(250, 45)">
-            <circle cx="0" cy="0" r="14" fill="rgba(255, 255, 255, 0.05)" stroke="white" strokeWidth="1" strokeDasharray="3 2"/>
-            <path d="M-6 -6 C-2 -10 2 -10 6 -6 C8 -2 5 4 0 8 C-5 4 -8 -2 -6 -6 Z" fill="none" stroke="var(--primary)" strokeWidth="1.5"/>
-          </g>
-          
-          <line x1="63" y1="45" x2="122" y2="45" stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeDasharray="3 3"/>
-          <line x1="178" y1="45" x2="232" y2="45" stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeDasharray="3 3"/>
-          
-          <circle cx="92" cy="45" r="2.5" fill="var(--primary)">
-            <animate attributeName="cx" values="63;122" dur="3s" repeatCount="indefinite" />
-          </circle>
-          <circle cx="205" cy="45" r="2.5" fill="var(--accent)">
-            <animate attributeName="cx" values="178;232" dur="3.5s" repeatCount="indefinite" />
-          </circle>
-          
-          <text x="45" y="82" fill="#94a3b8" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Redux State</text>
-          <text x="150" y="82" fill="var(--accent)" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">REST APIs</text>
-          <text x="250" y="82" fill="#94a3b8" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">MongoDB</text>
-        </svg>
-      );
-    case 'proj-goonj':
-      return (
-        <svg width="100%" height="100%" viewBox="0 0 300 100" className="proj-svg-render">
-          <defs>
-            <linearGradient id="goonjGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.4"/>
-              <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.08"/>
-            </linearGradient>
-          </defs>
-          <rect x="10" y="10" width="280" height="80" rx="8" fill="url(#goonjGrad)" stroke="rgba(255,255,255,0.03)"/>
-          
-          <g transform="translate(60, 45)">
-            <circle cx="0" cy="0" r="16" fill="none" stroke="white" strokeWidth="1" strokeDasharray="4 2"/>
-            <circle cx="0" cy="0" r="11" fill="none" stroke="var(--accent)" strokeWidth="1.5"/>
-            <ellipse rx="11" ry="4" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
-            <ellipse rx="4" ry="11" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
-          </g>
-          
-          <g transform="translate(180, 45)">
-            <rect x="-35" y="-18" width="70" height="36" rx="4" fill="rgba(0, 0, 0, 0.3)" stroke="var(--primary)" strokeWidth="1"/>
-            <line x1="-25" y1="-8" x2="10" y2="-8" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5"/>
-            <line x1="-25" y1="0" x2="20" y2="0" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5"/>
-            <circle cx="-25" cy="8" r="3" fill="var(--primary)"/>
-            <line x1="-15" y1="8" x2="25" y2="8" stroke="var(--primary)" strokeWidth="1.5"/>
-          </g>
-          
-          <g transform="translate(260, 45)">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
-              fill="none" stroke="var(--accent)" strokeWidth="1.5" transform="scale(0.8) translate(-12, -12)"/>
-          </g>
-          
-          <text x="60" y="82" fill="#94a3b8" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Outreach</text>
-          <text x="180" y="82" fill="var(--primary)" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Volunteer Ingest</text>
-          <text x="260" y="82" fill="#94a3b8" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Impact</text>
-        </svg>
-      );
-    case 'proj-myntra':
-      return (
-        <svg width="100%" height="100%" viewBox="0 0 300 100" className="proj-svg-render">
-          <defs>
-            <linearGradient id="myntraGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.3"/>
-              <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.02"/>
-            </linearGradient>
-          </defs>
-          <rect x="10" y="10" width="280" height="80" rx="8" fill="url(#myntraGrad)" stroke="rgba(255,255,255,0.03)"/>
-          
-          <rect x="20" y="18" width="260" height="10" rx="2" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5"/>
-          <circle cx="30" cy="23" r="2.5" fill="var(--accent)"/>
-          <line x1="50" y1="23" x2="120" y2="23" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
-          <line x1="220" y1="23" x2="250" y2="23" stroke="var(--primary)" strokeWidth="1.5"/>
-          
-          <rect x="20" y="34" width="130" height="46" rx="3" fill="rgba(0, 0, 0, 0.25)" stroke="var(--primary)" strokeWidth="1"/>
-          <circle cx="85" cy="57" r="6" fill="none" stroke="var(--primary)" strokeWidth="1"/>
-          
-          <rect x="160" y="34" width="50" height="46" rx="3" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
-          <line x1="168" y1="72" x2="202" y2="72" stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
-          
-          <rect x="220" y="34" width="50" height="46" rx="3" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
-          <line x1="228" y1="72" x2="262" y2="72" stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
-        </svg>
-      );
-    case 'proj-blinkit':
-      return (
-        <svg width="100%" height="100%" viewBox="0 0 300 100" className="proj-svg-render">
-          <defs>
-            <linearGradient id="blinkitGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.4"/>
-              <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.08"/>
-            </linearGradient>
-          </defs>
-          <rect x="10" y="10" width="280" height="80" rx="8" fill="url(#blinkitGrad)" stroke="rgba(255,255,255,0.03)"/>
-          
-          <g transform="translate(45, 45)">
-            <rect x="-25" y="-15" width="50" height="30" rx="4" fill="rgba(0,0,0,0.3)" stroke="var(--accent)" strokeWidth="1"/>
-            <text x="0" y="-3" fill="var(--accent)" fontSize="7" fontWeight="bold" fontFamily="var(--font-mono)" textAnchor="middle">$45.90</text>
-            <text x="0" y="7" fill="white" fontSize="6" fontFamily="var(--font-mono)" textAnchor="middle">4 ITEMS</text>
-          </g>
-          
-          <g transform="translate(150, 45)">
-            <rect x="-30" y="-12" width="60" height="24" rx="12" fill="var(--primary)" fillOpacity="0.1" stroke="var(--primary)" strokeWidth="1"/>
-            <path d="M-10 -4 H6 L12 4 H-4 Z" fill="none" stroke="white" strokeWidth="1.5"/>
-            <circle cx="-4" cy="5" r="2.5" fill="var(--accent)"/>
-            <circle cx="6" cy="5" r="2.5" fill="var(--accent)"/>
-          </g>
-          
-          <g transform="translate(245, 45)">
-            <rect x="-20" y="-15" width="40" height="30" rx="3" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
-            <circle cx="-10" cy="-5" r="3" fill="var(--primary)"/>
-            <circle cx="10" cy="-5" r="3" fill="rgba(255,255,255,0.2)"/>
-            <circle cx="-10" cy="5" r="3" fill="var(--accent)"/>
-            <circle cx="10" cy="5" r="3" fill="var(--primary)"/>
-          </g>
-          
-          <path d="M72 45 H118 M182 45 H222" stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeDasharray="3 3"/>
-          
-          <text x="45" y="82" fill="#94a3b8" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Context API</text>
-          <text x="150" y="82" fill="var(--primary)" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Fast replica</text>
-          <text x="245" y="82" fill="#94a3b8" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Stock Sync</text>
-        </svg>
-      );
-    case 'proj-figma':
-      return (
-        <svg width="100%" height="100%" viewBox="0 0 300 100" className="proj-svg-render">
-          <defs>
-            <linearGradient id="figmaGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.4"/>
-              <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.08"/>
-            </linearGradient>
-          </defs>
-          <rect x="10" y="10" width="280" height="80" rx="8" fill="url(#figmaGrad)" stroke="rgba(255,255,255,0.03)"/>
-          
-          <line x1="30" y1="20" x2="30" y2="80" stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeDasharray="2 2"/>
-          <line x1="270" y1="20" x2="270" y2="80" stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeDasharray="2 2"/>
-          <line x1="20" y1="50" x2="280" y2="50" stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeDasharray="2 2"/>
-          
-          <rect x="90" y="25" width="120" height="50" rx="4" fill="none" stroke="var(--primary)" strokeWidth="1.5" strokeDasharray="4 2"/>
-          
-          <text x="150" y="45" fill="white" fontSize="8" fontWeight="bold" fontFamily="var(--font-mono)" textAnchor="middle">W: 100%</text>
-          <text x="150" y="60" fill="var(--accent)" fontSize="8" fontWeight="bold" fontFamily="var(--font-mono)" textAnchor="middle">H: 500px</text>
-          
-          <circle cx="90" cy="25" r="3" fill="var(--primary)"/>
-          <circle cx="210" cy="25" r="3" fill="var(--primary)"/>
-          <circle cx="90" cy="75" r="3" fill="var(--primary)"/>
-          <circle cx="210" cy="75" r="3" fill="var(--primary)"/>
-          
-          <text x="45" y="82" fill="#94a3b8" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Raw Tokens</text>
-          <text x="250" y="82" fill="#94a3b8" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Pixel Perfect</text>
-        </svg>
-      );
-    default:
-      return null;
-  }
-};
-
-const renderArchitectureDiagram = (id) => {
-  const nodeGradStyle = {
-    fill: 'url(#nodeGrad)',
-    stroke: 'rgba(255,255,255,0.06)'
-  };
-  
-  switch (id) {
-    case 'proj-ecommerce':
-      return (
-        <svg width="100%" height="100%" viewBox="0 0 500 140" className="architecture-diagram-svg">
-          <defs>
-            <linearGradient id="nodeGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.45"/>
-              <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.06"/>
-            </linearGradient>
-          </defs>
-          <rect x="20" y="40" width="110" height="50" rx="6" style={nodeGradStyle}/>
-          <rect x="195" y="40" width="110" height="50" rx="6" style={nodeGradStyle}/>
-          <rect x="370" y="40" width="110" height="50" rx="6" style={nodeGradStyle}/>
-          
-          <line x1="130" y1="65" x2="195" y2="65" stroke="var(--primary)" strokeWidth="1.5" strokeDasharray="3 3"/>
-          <line x1="305" y1="65" x2="370" y2="65" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="3 3"/>
-          
-          <text x="75" y="66" fill="white" fontSize="8.5" fontFamily="var(--font-mono)" textAnchor="middle">Next.js SSR</text>
-          <text x="75" y="78" fill="var(--accent)" fontSize="7" fontFamily="var(--font-mono)" textAnchor="middle">Redux Client</text>
-          <text x="75" y="112" fill="#64748b" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Responsive Viewport</text>
-          
-          <text x="250" y="66" fill="white" fontSize="8.5" fontFamily="var(--font-mono)" textAnchor="middle">Express Server</text>
-          <text x="250" y="78" fill="var(--primary)" fontSize="7" fontFamily="var(--font-mono)" textAnchor="middle">JWT Sessions</text>
-          <text x="250" y="112" fill="var(--primary)" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">REST Middleware</text>
-          
-          <text x="425" y="66" fill="white" fontSize="8.5" fontFamily="var(--font-mono)" textAnchor="middle">MongoDB Cluster</text>
-          <text x="425" y="78" fill="var(--accent)" fontSize="7" fontFamily="var(--font-mono)" textAnchor="middle">Indexed Queries</text>
-          <text x="425" y="112" fill="#64748b" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Data Pipeline Store</text>
-        </svg>
-      );
-    case 'proj-goonj':
-      return (
-        <svg width="100%" height="100%" viewBox="0 0 500 140" className="architecture-diagram-svg">
-          <defs>
-            <linearGradient id="nodeGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.45"/>
-              <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.06"/>
-            </linearGradient>
-          </defs>
-          <rect x="20" y="40" width="110" height="50" rx="6" style={nodeGradStyle}/>
-          <rect x="195" y="40" width="110" height="50" rx="6" style={nodeGradStyle}/>
-          <rect x="370" y="40" width="110" height="50" rx="6" style={nodeGradStyle}/>
-          
-          <line x1="130" y1="65" x2="195" y2="65" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="3 3"/>
-          <line x1="305" y1="65" x2="370" y2="65" stroke="var(--primary)" strokeWidth="1.5" strokeDasharray="3 3"/>
-          
-          <text x="75" y="66" fill="white" fontSize="8.5" fontFamily="var(--font-mono)" textAnchor="middle">Form Inputs</text>
-          <text x="75" y="78" fill="var(--primary)" fontSize="7" fontFamily="var(--font-mono)" textAnchor="middle">User Submissions</text>
-          <text x="75" y="112" fill="#64748b" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Dynamic Capture</text>
-          
-          <text x="250" y="66" fill="white" fontSize="8.5" fontFamily="var(--font-mono)" textAnchor="middle">Tailwind UI</text>
-          <text x="250" y="78" fill="var(--accent)" fontSize="7" fontFamily="var(--font-mono)" textAnchor="middle">Backdrop Blurs</text>
-          <text x="250" y="112" fill="var(--accent)" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Validation layer</text>
-          
-          <text x="425" y="66" fill="white" fontSize="8.5" fontFamily="var(--font-mono)" textAnchor="middle">Data Registry</text>
-          <text x="425" y="78" fill="var(--primary)" fontSize="7" fontFamily="var(--font-mono)" textAnchor="middle">Volunteer Store</text>
-          <text x="425" y="112" fill="#64748b" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Target Ingest Hub</text>
-        </svg>
-      );
-    case 'proj-myntra':
-      return (
-        <svg width="100%" height="100%" viewBox="0 0 500 140" className="architecture-diagram-svg">
-          <defs>
-            <linearGradient id="nodeGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.45"/>
-              <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.06"/>
-            </linearGradient>
-          </defs>
-          <rect x="20" y="40" width="110" height="50" rx="6" style={nodeGradStyle}/>
-          <rect x="195" y="40" width="110" height="50" rx="6" style={nodeGradStyle}/>
-          <rect x="370" y="40" width="110" height="50" rx="6" style={nodeGradStyle}/>
-          
-          <line x1="130" y1="65" x2="195" y2="65" stroke="var(--primary)" strokeWidth="1.5" strokeDasharray="3 3"/>
-          <line x1="305" y1="65" x2="370" y2="65" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="3 3"/>
-          
-          <text x="75" y="66" fill="white" fontSize="8.5" fontFamily="var(--font-mono)" textAnchor="middle">HTML5 Semantic</text>
-          <text x="75" y="78" fill="var(--accent)" fontSize="7" fontFamily="var(--font-mono)" textAnchor="middle">Wireframe Mock</text>
-          <text x="75" y="112" fill="#64748b" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Pixel-Perfect View</text>
-          
-          <text x="250" y="66" fill="white" fontSize="8.5" fontFamily="var(--font-mono)" textAnchor="middle">CSS3 Grid</text>
-          <text x="250" y="78" fill="var(--primary)" fontSize="7" fontFamily="var(--font-mono)" textAnchor="middle">Dropdown Overlay</text>
-          <text x="250" y="112" fill="var(--primary)" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Fluid Layout Engine</text>
-          
-          <text x="425" y="66" fill="white" fontSize="8.5" fontFamily="var(--font-mono)" textAnchor="middle">Local Storage</text>
-          <text x="425" y="78" fill="var(--accent)" fontSize="7" fontFamily="var(--font-mono)" textAnchor="middle">Bag State Sync</text>
-          <text x="425" y="112" fill="#64748b" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Persistence layer</text>
-        </svg>
-      );
-    case 'proj-blinkit':
-      return (
-        <svg width="100%" height="100%" viewBox="0 0 500 140" className="architecture-diagram-svg">
-          <defs>
-            <linearGradient id="nodeGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.45"/>
-              <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.06"/>
-            </linearGradient>
-          </defs>
-          <rect x="20" y="40" width="110" height="50" rx="6" style={nodeGradStyle}/>
-          <rect x="195" y="40" width="110" height="50" rx="6" style={nodeGradStyle}/>
-          <rect x="370" y="40" width="110" height="50" rx="6" style={nodeGradStyle}/>
-          
-          <line x1="130" y1="65" x2="195" y2="65" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="3 3"/>
-          <line x1="305" y1="65" x2="370" y2="65" stroke="var(--primary)" strokeWidth="1.5" strokeDasharray="3 3"/>
-          
-          <text x="75" y="66" fill="white" fontSize="8.5" fontFamily="var(--font-mono)" textAnchor="middle">React Modules</text>
-          <text x="75" y="78" fill="var(--primary)" fontSize="7" fontFamily="var(--font-mono)" textAnchor="middle">Item Grid Matrices</text>
-          <text x="75" y="112" fill="#64748b" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Fast Delivery UI</text>
-          
-          <text x="250" y="66" fill="white" fontSize="8.5" fontFamily="var(--font-mono)" textAnchor="middle">Context Provider</text>
-          <text x="250" y="78" fill="var(--accent)" fontSize="7" fontFamily="var(--font-mono)" textAnchor="middle">Reducer Dispatch</text>
-          <text x="250" y="112" fill="var(--accent)" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Price Calculations</text>
-          
-          <text x="425" y="66" fill="white" fontSize="8.5" fontFamily="var(--font-mono)" textAnchor="middle">Stock Registry</text>
-          <text x="425" y="78" fill="var(--primary)" fontSize="7" fontFamily="var(--font-mono)" textAnchor="middle">JSON Mock DB</text>
-          <text x="425" y="112" fill="#64748b" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">State Synchronizer</text>
-        </svg>
-      );
-    case 'proj-figma':
-      return (
-        <svg width="100%" height="100%" viewBox="0 0 500 140" className="architecture-diagram-svg">
-          <defs>
-            <linearGradient id="nodeGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.45"/>
-              <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.06"/>
-            </linearGradient>
-          </defs>
-          <rect x="20" y="40" width="110" height="50" rx="6" style={nodeGradStyle}/>
-          <rect x="195" y="40" width="110" height="50" rx="6" style={nodeGradStyle}/>
-          <rect x="370" y="40" width="110" height="50" rx="6" style={nodeGradStyle}/>
-          
-          <line x1="130" y1="65" x2="195" y2="65" stroke="var(--primary)" strokeWidth="1.5" strokeDasharray="3 3"/>
-          <line x1="305" y1="65" x2="370" y2="65" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="3 3"/>
-          
-          <text x="75" y="66" fill="white" fontSize="8.5" fontFamily="var(--font-mono)" textAnchor="middle">Figma Specs</text>
-          <text x="75" y="78" fill="var(--accent)" fontSize="7" fontFamily="var(--font-mono)" textAnchor="middle">Raw Visual Tokens</text>
-          <text x="75" y="112" fill="#64748b" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Layout Spec Source</text>
-          
-          <text x="250" y="66" fill="white" fontSize="8.5" fontFamily="var(--font-mono)" textAnchor="middle">Bootstrap Flex</text>
-          <text x="250" y="78" fill="var(--primary)" fontSize="7" fontFamily="var(--font-mono)" textAnchor="middle">Utility Grid Map</text>
-          <text x="250" y="112" fill="var(--primary)" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Fluid Responsive DOM</text>
-          
-          <text x="425" y="66" fill="white" fontSize="8.5" fontFamily="var(--font-mono)" textAnchor="middle">High-Fi Web UI</text>
-          <text x="425" y="78" fill="var(--accent)" fontSize="7" fontFamily="var(--font-mono)" textAnchor="middle">Micro-Animations</text>
-          <text x="425" y="112" fill="#64748b" fontSize="8" fontFamily="var(--font-display)" textAnchor="middle">Pixel-Perfect Hydrate</text>
-        </svg>
-      );
-    default:
-      return null;
-  }
-};
+import { PROJECTS_DATA, SKILLS_DATA, CREDENTIALS_DATA, ROLES_POOL, TERMINAL_INITIAL_HISTORY, CONTACT_LINKS } from './data/portfolioData';
+import useCardHover from './hooks/useCardHover';
+import useTypingCarousel from './hooks/useTypingCarousel';
+import SectionHeader from './components/SectionHeader';
+import ContactBadge from './components/ContactBadge';
+import FormField from './components/FormField';
+import SkillIcon from './components/SkillIcon';
+import ProjectVisual from './components/ProjectVisual';
+import ArchitectureDiagram from './components/ArchitectureDiagram';
 
 // ==========================================
 // MASTERPIECE APPLICATION COMPONENT
@@ -626,9 +18,8 @@ const renderArchitectureDiagram = (id) => {
 export default function App() {
   // Navigation and dynamic states
   const [activeFilter, setActiveFilter] = useState('All');
-  const [selectedProject, setSelectedProject] = useState(null); // Case study drawer state
+  const [selectedProject, setSelectedProject] = useState(null);
   const [activeSkillId, setActiveSkillId] = useState('react');
-  const [typingRole, setTypingRole] = useState('');
   const [toast, setToast] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -642,10 +33,7 @@ export default function App() {
   // Elite Operational Terminal States
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [terminalInput, setTerminalInput] = useState('');
-  const [terminalHistory, setTerminalHistory] = useState([
-    { text: '✦ SHIVAM SECURE SHELL SYSTEM v2.0.6', type: 'output-header' },
-    { text: '✦ Type "help" to display available operational commands.', type: 'output-system' }
-  ]);
+  const [terminalHistory, setTerminalHistory] = useState([...TERMINAL_INITIAL_HISTORY]);
   const [autocompleteHint, setAutocompleteHint] = useState('');
   const [isMatrixActive, setIsMatrixActive] = useState(false);
 
@@ -654,7 +42,6 @@ export default function App() {
 
   const canvasRef = useRef(null);
   const visualPanelRef = useRef(null);
-  const cardRectsRef = useRef(new WeakMap());
   
   // Custom interactive refs
   const cursorRef = useRef(null);
@@ -665,53 +52,17 @@ export default function App() {
   const navbarRef = useRef(null);
   const navLinksRef = useRef(null);
 
-  // Dynamic Typing Carousel
-  useEffect(() => {
-    let wordIndex = 0;
-    let letterIndex = 0;
-    let isDeleting = false;
-    let timeoutId;
+  // Shared hooks
+  const { cardHoverProps } = useCardHover();
+  const typingRole = useTypingCarousel(ROLES_POOL);
 
-    const type = () => {
-      const currentWord = ROLES_POOL[wordIndex];
-      if (isDeleting) {
-        setTypingRole(currentWord.substring(0, letterIndex - 1));
-        letterIndex--;
-      } else {
-        setTypingRole(currentWord.substring(0, letterIndex + 1));
-        letterIndex++;
-      }
-
-      let typeSpeed = 100;
-
-      if (isDeleting) {
-        typeSpeed /= 2; // delete faster
-      }
-
-      if (!isDeleting && letterIndex === currentWord.length) {
-        typeSpeed = 1500; // pause at full word
-        isDeleting = true;
-      } else if (isDeleting && letterIndex === 0) {
-        isDeleting = false;
-        wordIndex = (wordIndex + 1) % ROLES_POOL.length;
-        typeSpeed = 500; // pause before typing next word
-      }
-
-      timeoutId = setTimeout(type, typeSpeed);
-    };
-
-    type();
-
-    return () => clearTimeout(timeoutId);
-  }, []);
-
-  // Disable body scroll when case study drawer or terminal overlay is active to prevent scroll leak
+  // Disable body scroll when case study drawer or terminal overlay is active
   useEffect(() => {
     const isLocked = selectedProject || isTerminalOpen;
     if (isLocked) {
       document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = '8px'; // Prevents layout shift from scrollbar removal
+      document.body.style.paddingRight = '8px';
     } else {
       document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
@@ -724,18 +75,16 @@ export default function App() {
     };
   }, [selectedProject, isTerminalOpen]);
 
-  // Pure React Header, Scrollspy, & Navigation Pill Interactions (100% jQuery-Free)
+  // Pure React Header, Scrollspy, & Navigation Pill Interactions
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
       
-      // 1. Toggle scrolled navbar class
       setIsScrolled(scrollTop > 40);
 
-      // 2. Scrollspy: Calculate which section occupies the viewport the most
       const winHeight = window.innerHeight;
       const navSectionIds = ['about', 'skills', 'projects', 'credentials', 'contact'];
-      let currentSectionId = '';
+      let currentSectionId;
 
       if (scrollTop < 80) {
         currentSectionId = 'about';
@@ -748,7 +97,6 @@ export default function App() {
           if (!sec) return;
           const rect = sec.getBoundingClientRect();
           
-          // Calculate intersection heights in the viewport
           const visibleTop = Math.max(0, rect.top);
           const visibleBottom = Math.min(winHeight, rect.bottom);
           const visibleHeight = Math.max(0, visibleBottom - visibleTop);
@@ -768,7 +116,6 @@ export default function App() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    // Trigger scroll immediately on load to set correct initial states
     const triggerTimeout = setTimeout(handleScroll, 100);
 
     return () => {
@@ -777,13 +124,12 @@ export default function App() {
     };
   }, []);
 
-  // Slide sliding capsule pill & update scroll progress bar to align with active links
+  // Slide sliding capsule pill & update scroll progress bar
   useEffect(() => {
     let activeId = activeSection;
     let rId;
 
     const updatePill = () => {
-      // If at the very top of the page (Hero section), reset indicators
       if (window.scrollY < 100) {
         setPillStyle(prev => ({ ...prev, opacity: 0 }));
         setScrollProgress(0);
@@ -800,14 +146,12 @@ export default function App() {
       const navbar = navbarRef.current;
       
       if (activeLink && navbar) {
-        // Slide capsule pill
         setPillStyle({
           left: activeLink.offsetLeft,
           width: activeLink.offsetWidth,
           opacity: 1
         });
 
-        // Fill scroll progress bar exactly up to the right edge of the active link
         const linkRect = activeLink.getBoundingClientRect();
         const navRect = navbar.getBoundingClientRect();
         const rightEdge = linkRect.right - navRect.left;
@@ -821,7 +165,6 @@ export default function App() {
       rId = requestAnimationFrame(updatePill);
     };
 
-    // Update initially
     rId = requestAnimationFrame(updatePill);
 
     window.addEventListener('resize', handleResizeOrScroll, { passive: true });
@@ -867,10 +210,8 @@ export default function App() {
 
   // GSAP Cinematic Reveal Animations
   useEffect(() => {
-    // Cinematic timeline with premium ease mappings
     const tl = gsap.timeline({ defaults: { ease: 'power3.out', duration: 1.4 } });
 
-    // Initial offsets to prevent layout shifting
     gsap.set('.navbar-wrapper', { y: -60, opacity: 0 });
     gsap.set('.hero-tagline', { y: 25, opacity: 0 });
     gsap.set('.hero-main-title', { y: 35, opacity: 0 });
@@ -879,7 +220,6 @@ export default function App() {
     gsap.set('.hero-ctas > *', { y: 25, opacity: 0 });
     gsap.set('.visual-profile-card', { scale: 0.92, opacity: 0, rotationY: -8 });
 
-    // Cinematic execution flow
     tl.to('.navbar-wrapper', {
       y: 0,
       opacity: 1,
@@ -919,19 +259,17 @@ export default function App() {
       ease: 'elastic.out(1, 0.85)'
     }, '-=1.2');
 
-    // Scroll-triggered animations via dynamic IntersectionObserver + GSAP
+    // Scroll-triggered animations
     const observerOptions = {
       root: null,
       threshold: 0.02,
       rootMargin: '0px 0px -20px 0px'
     };
 
-    // Observe each portfolio container
     const sections = document.querySelectorAll('section.section');
 
-    // Hide all scroll-triggered elements initially so they are completely sided/invisible
     sections.forEach(sec => {
-      if (sec.classList.contains('hero-section')) return; // Skip hero section as it's animated by intro timeline
+      if (sec.classList.contains('hero-section')) return;
       
       const subtitle = sec.querySelector('.section-subtitle');
       const title = sec.querySelector('.section-title');
@@ -945,7 +283,6 @@ export default function App() {
       }
       if (cards.length) {
         cards.forEach((card, idx) => {
-          // Alternate slide directions with subtle professional offset (60px)
           const sideOffset = idx % 2 === 0 ? -60 : 60;
           gsap.set(card, { x: sideOffset, opacity: 0, scale: 0.97 });
         });
@@ -960,7 +297,6 @@ export default function App() {
           const title = section.querySelector('.section-title');
           const cards = section.querySelectorAll('.bento-card, .glass-panel, .project-card-wrap, .credentials-grid > *, .contact-bento-layout > *');
 
-          // Staggered reveal vectors coming from the sides
           if (subtitle) {
             gsap.to(subtitle, { y: 0, opacity: 1, duration: 1.1, ease: 'power3.out' });
           }
@@ -977,11 +313,10 @@ export default function App() {
               stagger: 0.12,
               delay: 0.08,
               ease: 'power3.out',
-              clearProps: 'transform,opacity' // Clears inline styles to let native hover transforms/opacities work!
+              clearProps: 'transform,opacity'
             });
           }
 
-          // Disconnect observer for this section once animated
           sectionObserver.unobserve(section);
         }
       });
@@ -1006,10 +341,10 @@ export default function App() {
   const handleCopyEmail = (e) => {
     if (e) e.preventDefault();
     navigator.clipboard.writeText('shekhawatshivamsingh3@gmail.com');
-    triggerToast('✦ Core email copied to clipboard registry!');
+    triggerToast('\u2726 Core email copied to clipboard registry!');
   };
 
-  // Contact form submission with high-end quantum-encryption ingest simulation
+  // Contact form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) {
@@ -1017,7 +352,7 @@ export default function App() {
       return;
     }
     setIsSubmitting(true);
-    triggerToast('✦ Initiating secure quantum connection handshake...');
+    triggerToast('\u2726 Initiating secure quantum connection handshake...');
     
     setTimeout(() => {
       triggerToast(`[TRANSMISSION VERIFIED] Thanks ${form.name}! Shivam will initiate connection shortly.`);
@@ -1026,51 +361,7 @@ export default function App() {
     }, 1800);
   };
 
-  // 3D Card Hover Physics & Vercel-Style Border Spotlight Custom Properties
-  const handleCardMouseMove = (e) => {
-    const card = e.currentTarget;
-    
-    // Lazy cache the bounding client rect on first move to prevent layout thrashing!
-    let rect = cardRectsRef.current.get(card);
-    if (!rect) {
-      rect = card.getBoundingClientRect();
-      cardRectsRef.current.set(card, rect);
-    }
-    
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    // Set custom CSS coordinates for our ultra-fine 3D border spotlights!
-    card.style.setProperty('--mouse-x', `${x}px`);
-    card.style.setProperty('--mouse-y', `${y}px`);
-    
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    
-    const deltaX = (x - centerX) / centerX;
-    const deltaY = (y - centerY) / centerY;
-    
-    const rotateX = (-deltaY * 7).toFixed(2); // Tilt pitch (max 7deg)
-    const rotateY = (deltaX * 7).toFixed(2);  // Tilt yaw (max 7deg)
-    
-    card.style.transition = 'none'; // Instant response to mouse coordinates, no transition lag!
-    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-  };
-
-  const handleCardMouseLeave = (e) => {
-    const card = e.currentTarget;
-    cardRectsRef.current.delete(card); // Clear cached rect
-    
-    // Smooth reset of border spotlight coordinates
-    card.style.removeProperty('--mouse-x');
-    card.style.removeProperty('--mouse-y');
-    
-    // Buttery-smooth spring back on leave!
-    card.style.transition = 'transform 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.4s ease, box-shadow 0.4s ease';
-    card.style.transform = 'rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-  };
-
-  // Premium 3D Holographic Orbiting Canvas Sphere (120 FPS Perspective Projection)
+  // Premium 3D Holographic Orbiting Canvas Sphere
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -1227,13 +518,13 @@ export default function App() {
     };
   }, []);
 
-  // Elite Custom Trailing Magnetic Cursors & Physical Snapping Pull
+  // Elite Custom Trailing Magnetic Cursors
   useEffect(() => {
     const cursor = cursorRef.current;
     const follower = followerRef.current;
     if (!cursor || !follower) return;
 
-    const grid = document.querySelector('.cyber-grid-overlay'); // Query once on mount!
+    const grid = document.querySelector('.cyber-grid-overlay');
 
     let mouseX = 0, mouseY = 0;
     let followerX = 0, followerY = 0;
@@ -1248,7 +539,6 @@ export default function App() {
       mouseY = e.clientY;
       cursor.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
 
-      // Parallax cyber grid tilt effect using cached reference!
       if (grid) {
         const tiltX = (e.clientX - window.innerWidth / 2) * 0.012;
         const tiltY = (e.clientY - window.innerHeight / 2) * -0.012;
@@ -1392,10 +682,7 @@ export default function App() {
     if (isTerminalOpen) {
       if (terminalHistory.length === 0) {
         setTimeout(() => {
-          setTerminalHistory([
-            { text: '✦ SHIVAM SECURE SHELL SYSTEM v2.0.6', type: 'output-header' },
-            { text: '✦ Type "help" to display available operational commands.', type: 'output-system' }
-          ]);
+          setTerminalHistory([...TERMINAL_INITIAL_HISTORY]);
         }, 0);
       }
       setTimeout(() => {
@@ -1454,7 +741,7 @@ export default function App() {
 
     switch (cmd) {
       case 'help':
-        addHistoryLine('✦ AVAILABLE OPERATIONAL COMMANDS:', 'output-header');
+        addHistoryLine('\u2726 AVAILABLE OPERATIONAL COMMANDS:', 'output-header');
         addHistoryLine('  about         - Display Shivam\'s personal and VGU scholar specs', 'output-system');
         addHistoryLine('  skills        - Render interactive core skills competency matrix', 'output-system');
         addHistoryLine('  projects      - Showcase verified portfolio case study matrix', 'output-system');
@@ -1480,35 +767,35 @@ export default function App() {
         return;
 
       case 'about':
-        addHistoryLine('✦ SHIVAM SINGH SHEKHAWAT - CORE METRICS:', 'output-header');
-        addHistoryLine('  ────────────────────────────────────────────────', 'output-system');
+        addHistoryLine('\u2726 SHIVAM SINGH SHEKHAWAT - CORE METRICS:', 'output-header');
+        addHistoryLine('  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500', 'output-system');
         addHistoryLine('  Role: Full Stack Web Developer & AI Web Craftsman', 'output-system');
         addHistoryLine('  Degree: BCA Student @ Vivekananda Global University, Jaipur', 'output-system');
         addHistoryLine('  Focus: High-Performance MERN Stack & Next.js Systems', 'output-system');
         addHistoryLine('  Status: Available for 2026 contract requests', 'output-success');
         addHistoryLine('  Email: shekhawatshivamsingh3@gmail.com', 'output-system');
-        addHistoryLine('  ────────────────────────────────────────────────', 'output-system');
+        addHistoryLine('  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500', 'output-system');
         break;
 
       case 'skills':
-        addHistoryLine('✦ CORE COMPETENCY MATRIX:', 'output-header');
-        addHistoryLine('  React/Next.js [██████████████████░] 90% - Advanced Master', 'output-success');
-        addHistoryLine('  Tailwind CSS  [██████████████████░] 92% - Advanced Master', 'output-success');
-        addHistoryLine('  HTML5/CSS3    [███████████████████] 95% - Expert Craftsman', 'output-success');
-        addHistoryLine('  JavaScript    [█████████████████░░] 88% - Advanced Core', 'output-success');
-        addHistoryLine('  Git & GitHub  [████████████████░░░] 86% - Advanced Core', 'output-system');
-        addHistoryLine('  Bootstrap 5   [████████████████░░░] 85% - Advanced Core', 'output-system');
-        addHistoryLine('  Express/Node  [████████████████░░░] 82% - Intermediate Specialist', 'output-system');
-        addHistoryLine('  MongoDB       [████████████████░░░] 80% - Intermediate Specialist', 'output-system');
+        addHistoryLine('\u2726 CORE COMPETENCY MATRIX:', 'output-header');
+        addHistoryLine('  React/Next.js [\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591] 90% - Advanced Master', 'output-success');
+        addHistoryLine('  Tailwind CSS  [\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591] 92% - Advanced Master', 'output-success');
+        addHistoryLine('  HTML5/CSS3    [\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588] 95% - Expert Craftsman', 'output-success');
+        addHistoryLine('  JavaScript    [\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591] 88% - Advanced Core', 'output-success');
+        addHistoryLine('  Git & GitHub  [\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591] 86% - Advanced Core', 'output-system');
+        addHistoryLine('  Bootstrap 5   [\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591] 85% - Advanced Core', 'output-system');
+        addHistoryLine('  Express/Node  [\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591] 82% - Intermediate Specialist', 'output-system');
+        addHistoryLine('  MongoDB       [\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591] 80% - Intermediate Specialist', 'output-system');
         break;
 
       case 'projects':
-        addHistoryLine('✦ FEATURED CASE STUDY MATRIX:', 'output-header');
+        addHistoryLine('\u2726 FEATURED CASE STUDY MATRIX:', 'output-header');
         PROJECTS_DATA.forEach((p, idx) => {
           addHistoryLine(`  [${idx + 1}] ${p.title} (${p.category})`, 'output-system');
           addHistoryLine(`      Specs: ${p.shortDesc}`, 'output-warning');
         });
-        addHistoryLine('  ────────────────────────────────────────────────', 'output-system');
+        addHistoryLine('  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500', 'output-system');
         addHistoryLine('  Type "project <number>" (e.g. "project 1") to load specs.', 'output-success');
         break;
 
@@ -1518,7 +805,7 @@ export default function App() {
           const selectedProj = PROJECTS_DATA[index];
           setSelectedProject(selectedProj);
           setIsTerminalOpen(false);
-          triggerToast(`✦ Loaded Case Study Specs: ${selectedProj.title}`);
+          triggerToast(`\u2726 Loaded Case Study Specs: ${selectedProj.title}`);
           return;
         } else {
           addHistoryLine(`[ERROR] Project specification index "${arg}" is not active.`, 'output-error');
@@ -1527,7 +814,7 @@ export default function App() {
       }
 
       case 'contact':
-        addHistoryLine('✦ SECURE COLLABORATION CONNECTION INITIALIZED', 'output-header');
+        addHistoryLine('\u2726 SECURE COLLABORATION CONNECTION INITIALIZED', 'output-header');
         addHistoryLine('  This console will capture inquiry parameters directly.', 'output-system');
         addHistoryLine('  Please use the graphical form in the footer or reach out:', 'output-warning');
         addHistoryLine('  Email: shekhawatshivamsingh3@gmail.com', 'output-system');
@@ -1537,14 +824,14 @@ export default function App() {
 
       case 'status':
       case 'logs': {
-        addHistoryLine('✦ ESTABLISHING SECURE CONNECTION TO E-COMMERCE SERVER NODE:', 'output-header');
+        addHistoryLine('\u2726 ESTABLISHING SECURE CONNECTION TO E-COMMERCE SERVER NODE:', 'output-header');
         addHistoryLine('  Port: 5000 | MongoDB: Connected (latency: 14ms) | APIs: Synchronized', 'output-system');
-        addHistoryLine('  ────────────────────────────────────────────────', 'output-system');
+        addHistoryLine('  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500', 'output-system');
         addHistoryLine('  [MAPPED CRUD API STATUS]:', 'output-header');
         addHistoryLine('  - Brand controller endpoints: Mapped 6/6 successfully.', 'output-success');
         addHistoryLine('  - Color controller endpoints: Mapped 6/6 successfully.', 'output-success');
         addHistoryLine('  - Category controller endpoints: Typo patched successfully.', 'output-success');
-        addHistoryLine('  ────────────────────────────────────────────────', 'output-system');
+        addHistoryLine('  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500', 'output-system');
         addHistoryLine('  [REAL-TIME TRANSACTION READOUT]:', 'output-header');
         
         const endpoints = [
@@ -1556,11 +843,11 @@ export default function App() {
           'PUT /api/color/col-neon - 200 OK (45ms) - Cache invalidated'
         ];
         
-        endpoints.forEach(e => {
-          addHistoryLine(`  [TRAFFIC] ${e}`, 'output-warning');
+        endpoints.forEach(ep => {
+          addHistoryLine(`  [TRAFFIC] ${ep}`, 'output-warning');
         });
         
-        addHistoryLine('  ────────────────────────────────────────────────', 'output-system');
+        addHistoryLine('  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500', 'output-system');
         addHistoryLine('  All backend operational APIs verified stable.', 'output-success');
         break;
       }
@@ -1679,7 +966,7 @@ export default function App() {
       {/* Dynamic Toast Alerts */}
       {toast && (
         <div className="toast-msg">
-          <span style={{color: 'var(--accent)'}}>✦</span>
+          <span style={{color: 'var(--accent)'}}>&#10022;</span>
           <span>{toast}</span>
         </div>
       )}
@@ -1689,7 +976,6 @@ export default function App() {
           ========================================== */}
       <div className="navbar-wrapper">
         <nav className={`navbar ${isScrolled ? 'scrolled' : ''} ${isMobileMenuOpen ? 'mobile-active' : ''}`} ref={navbarRef}>
-          {/* Integrated laser scroll progress indicator */}
           <div className="navbar-progress-track">
             <div className="scroll-progress" style={{ width: `${scrollProgress}%` }}></div>
           </div>
@@ -1709,7 +995,6 @@ export default function App() {
 
           <a href="#contact" className="btn-nav-cta" style={{textDecoration: 'none'}} onClick={() => setIsMobileMenuOpen(false)}>Hire Shivam</a>
 
-          {/* Glowing responsive mobile capsule toggle */}
           <button className={`nav-mobile-toggle ${isMobileMenuOpen ? 'active' : ''}`} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
             <span className="bar"></span>
             <span className="bar"></span>
@@ -1746,7 +1031,7 @@ export default function App() {
           <div className="hero-ctas">
             <a href="#projects" className="btn-cta-primary">
               <span>View Case Studies</span>
-              <span>→</span>
+              <span>&rarr;</span>
             </a>
             <a 
               href="/full_stack_resume.pdf" 
@@ -1756,7 +1041,7 @@ export default function App() {
               style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
               <span>Download Resume</span>
-              <span style={{ fontSize: '1.05rem', lineHeight: 1 }}>⭳</span>
+              <span style={{ fontSize: '1.05rem', lineHeight: 1 }}>&#11123;</span>
             </a>
             <a href="#contact" className="btn-cta-secondary" style={{ background: 'transparent', border: 'none', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>Get In Touch</a>
           </div>
@@ -1769,8 +1054,7 @@ export default function App() {
           
           <div 
             className="visual-profile-card"
-            onMouseMove={handleCardMouseMove}
-            onMouseLeave={handleCardMouseLeave}
+            {...cardHoverProps}
           >
             <div className="visual-avatar-container">
               <img src="/shivam.jpeg" alt="Shivam Singh Shekhawat" className="visual-avatar-img" />
@@ -1783,8 +1067,8 @@ export default function App() {
             </div>
             
             <div className="stats-badge-row">
-              <span className="stats-badge">✦ 5+ Projects</span>
-              <span className="stats-badge">📍 Jaipur, IN</span>
+              <span className="stats-badge">&#10022; 5+ Projects</span>
+              <span className="stats-badge">&#128205; Jaipur, IN</span>
             </div>
             
             <p style={{fontSize: '0.75rem', color: '#cbd5e1', lineHeight: '1.4'}}>Engineering high-performance MERN & Next.js systems.</p>
@@ -1799,18 +1083,14 @@ export default function App() {
           ========================================== */}
       <section className="section" id="about">
         
-        <span className="section-subtitle">
-          <span>✦</span> Biography & Journey
-        </span>
-        <h2 className="section-title">Academic & <span className="editorial-title">Personal Profile</span></h2>
+        <SectionHeader subtitle="Biography & Journey" title="Academic &" titleHighlight="Personal Profile" />
 
         <div className="bento-grid">
           
           {/* Bento Card 1: Bio */}
           <div 
             className="bento-card bento-span-2 bento-bio-card"
-            onMouseMove={handleCardMouseMove}
-            onMouseLeave={handleCardMouseLeave}
+            {...cardHoverProps}
           >
             <h3 className="bento-card-title" style={{color: 'var(--primary)'}}>The Developer & Scholar</h3>
             <p>
@@ -1824,8 +1104,7 @@ export default function App() {
           {/* Bento Card 2: Metrics */}
           <div 
             className="bento-card"
-            onMouseMove={handleCardMouseMove}
-            onMouseLeave={handleCardMouseLeave}
+            {...cardHoverProps}
           >
             <h3 className="bento-card-title" style={{color: 'var(--accent)'}}>Platform Stats</h3>
             <div className="bento-stats-grid">
@@ -1843,20 +1122,19 @@ export default function App() {
           {/* Bento Card 3: Timeline VGU */}
           <div 
             className="bento-card bento-span-2"
-            onMouseMove={handleCardMouseMove}
-            onMouseLeave={handleCardMouseLeave}
+            {...cardHoverProps}
           >
-            <h3 className="bento-card-title" style={{color: 'var(--primary)'}}>Academic Timeline</h3>
+            <h3 className="bento-card-title">Academic Timeline</h3>
             <div className="bento-timeline">
               <div className="bento-timeline-node">
-                <span className="bento-timeline-date">09/2025 - PRESENT</span>
-                <span className="bento-timeline-title">BCA Degree</span>
-                <span className="bento-timeline-subtitle">Vivekananda Global University</span>
+                <span className="bento-timeline-date">2024 - 2027</span>
+                <span className="bento-timeline-title">BCA, VGU Jaipur</span>
+                <span className="bento-timeline-subtitle">Bachelor of Computer Applications</span>
               </div>
               <div className="bento-timeline-node">
-                <span className="bento-timeline-date">10/2025 - PRESENT</span>
-                <span className="bento-timeline-title">Gen AI & Full Stack Mastery</span>
-                <span className="bento-timeline-subtitle">Specialized training cohorts</span>
+                <span className="bento-timeline-date">2025 - Present</span>
+                <span className="bento-timeline-title">Full-Stack Development</span>
+                <span className="bento-timeline-subtitle">MERN Stack & Gen AI-enhanced builds</span>
               </div>
             </div>
           </div>
@@ -1864,11 +1142,10 @@ export default function App() {
           {/* Bento Card 4: Interests */}
           <div 
             className="bento-card"
-            onMouseMove={handleCardMouseMove}
-            onMouseLeave={handleCardMouseLeave}
+            {...cardHoverProps}
           >
-            <h3 className="bento-card-title" style={{color: 'var(--accent)'}}>Passions</h3>
-            <p style={{fontSize: '0.85rem', color: '#cbd5e1'}}>Key interests driving my development workflow:</p>
+            <h3 className="bento-card-title" style={{color: 'var(--accent)'}}>Focus Domains</h3>
+            <p className="bento-card-desc">Core areas of interest and hands-on focus in the modern web development pipeline.</p>
             <div className="chips-row">
               <span className="interest-chip">MERN Stack</span>
               <span className="interest-chip">Next.js SSR</span>
@@ -1886,10 +1163,7 @@ export default function App() {
           ========================================== */}
       <section className="section" id="skills">
         
-        <span className="section-subtitle">
-          <span>✦</span> Core Competencies
-        </span>
-        <h2 className="section-title">Interactive <span className="editorial-title">Skills Matrix</span></h2>
+        <SectionHeader subtitle="Core Competencies" title="Interactive" titleHighlight="Skills Matrix" />
 
         <div className="glass-panel skills-bento-grid" style={{padding: '2.25rem', borderRadius: 'var(--radius-lg)'}}>
           
@@ -1900,11 +1174,10 @@ export default function App() {
                 key={skill.id}
                 className={`glass-card skill-bento-card ${activeSkillId === skill.id ? 'active' : ''}`}
                 onClick={() => setActiveSkillId(skill.id)}
-                onMouseMove={handleCardMouseMove}
-                onMouseLeave={handleCardMouseLeave}
+                {...cardHoverProps}
               >
                 <div className="skill-icon-placeholder">
-                  {renderSkillIcon(skill.id)}
+                  <SkillIcon id={skill.id} />
                 </div>
                 <span style={{fontSize: '0.85rem', fontWeight: 600, color: 'white'}}>{skill.label.split(' ')[0]}</span>
               </div>
@@ -1914,8 +1187,7 @@ export default function App() {
           {/* Right: Analytics details Panel */}
           <div 
             className="glass-card skills-right-details"
-            onMouseMove={handleCardMouseMove}
-            onMouseLeave={handleCardMouseLeave}
+            {...cardHoverProps}
           >
             <div className="skills-details-wrapper">
               
@@ -1957,10 +1229,7 @@ export default function App() {
           ========================================== */}
       <section className="section" id="projects">
         
-        <span className="section-subtitle">
-          <span>✦</span> Case Studies
-        </span>
-        <h2 className="section-title">Featured <span className="editorial-title">Project Matrix</span></h2>
+        <SectionHeader subtitle="Case Studies" title="Featured" titleHighlight="Project Matrix" />
 
         {/* Filter Navigation */}
         <div className="projects-filter-bar-container">
@@ -1984,8 +1253,7 @@ export default function App() {
             <div className="project-card-wrap" key={project.id}>
               <div 
                 className="bento-card project-bento-card" 
-                onMouseMove={handleCardMouseMove}
-                onMouseLeave={handleCardMouseLeave}
+                {...cardHoverProps}
                 onClick={() => setSelectedProject(project)}
               >
                 <div>
@@ -1998,14 +1266,13 @@ export default function App() {
                   <p style={{fontSize: '0.85rem', color: '#cbd5e1', marginTop: '0.5rem', lineHeight: 1.5}}>{project.shortDesc}</p>
                 </div>
 
-                {/* SVG Visualizer mockups inside card */}
                 <div className="project-svg-visualizer">
-                  {renderProjectVisual(project.id)}
+                  <ProjectVisual id={project.id} />
                 </div>
 
                 <div style={{marginTop: '1.25rem', fontSize: '0.85rem', color: project.color, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px'}}>
                   <span>Analyze Case Study</span>
-                  <span>→</span>
+                  <span>&rarr;</span>
                 </div>
 
               </div>
@@ -2020,18 +1287,14 @@ export default function App() {
           ========================================== */}
       <section className="section" id="credentials">
         
-        <span className="section-subtitle">
-          <span>✦</span> Certificates & Achievements
-        </span>
-        <h2 className="section-title">Verified <span className="editorial-title">Credentials</span></h2>
+        <SectionHeader subtitle="Certificates & Achievements" title="Verified" titleHighlight="Credentials" />
 
         <div className="credentials-grid">
           {CREDENTIALS_DATA.map((cert, index) => (
             <div 
               className="bento-card cert-bento-card" 
               key={index}
-              onMouseMove={handleCardMouseMove}
-              onMouseLeave={handleCardMouseLeave}
+              {...cardHoverProps}
             >
               <div className="cert-icon-box">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -2056,79 +1319,24 @@ export default function App() {
           ========================================== */}
       <section className="section" id="contact">
         
-        <span className="section-subtitle">
-          <span>✦</span> Secure Connection Ingestion
-        </span>
-        <h2 className="section-title">Initiate <span className="editorial-title">Collaboration</span></h2>
+        <SectionHeader subtitle="Secure Connection Ingestion" title="Initiate" titleHighlight="Collaboration" />
 
         <div className="contact-bento-layout">
           
           <div className="contact-left-info">
             <p className="contact-text">
-              Have an enterprise project, complex backend specifications, or a full-stack job opportunity? Get in touch, and let’s engineer a solution.
+              Have an enterprise project, complex backend specifications, or a full-stack job opportunity? Get in touch, and let&apos;s engineer a solution.
             </p>
 
             <div className="contact-bento-badges">
-              
-              <div 
-                className="contact-badge-item"
-                style={{ cursor: 'pointer' }}
-                onClick={handleCopyEmail}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { handleCopyEmail(e); } }}
-                tabIndex={0}
-                role="button"
-                aria-label="Copy primary email to clipboard"
-                onMouseMove={handleCardMouseMove}
-                onMouseLeave={handleCardMouseLeave}
-              >
-                <div className="contact-badge-icon">✉</div>
-                <div>
-                  <div className="contact-badge-lbl">Primary Ingest Email (Click to Copy)</div>
-                  <div className="contact-badge-val">shekhawatshivamsingh3@gmail.com</div>
-                </div>
-              </div>
-
-              <a 
-                href="tel:8764719910" 
-                className="contact-badge-item"
-                onMouseMove={handleCardMouseMove}
-                onMouseLeave={handleCardMouseLeave}
-              >
-                <div className="contact-badge-icon">📞</div>
-                <div>
-                  <div className="contact-badge-lbl">Direct Communication Line</div>
-                  <div className="contact-badge-val">8764719910</div>
-                </div>
-              </a>
-
-              <a 
-                href="https://www.linkedin.com/in/shivam-singh-shekhawat-14826638a/" 
-                target="_blank" 
-                className="contact-badge-item"
-                onMouseMove={handleCardMouseMove}
-                onMouseLeave={handleCardMouseLeave}
-              >
-                <div className="contact-badge-icon">🔗</div>
-                <div>
-                  <div className="contact-badge-lbl">Professional LinkedIn Node</div>
-                  <div className="contact-badge-val">shivam-singh-shekhawat</div>
-                </div>
-              </a>
-
-              <a 
-                href="https://github.com/Shivam87647" 
-                target="_blank" 
-                className="contact-badge-item"
-                onMouseMove={handleCardMouseMove}
-                onMouseLeave={handleCardMouseLeave}
-              >
-                <div className="contact-badge-icon">🐙</div>
-                <div>
-                  <div className="contact-badge-lbl">Active Github Registry</div>
-                  <div className="contact-badge-val">Shivam87647</div>
-                </div>
-              </a>
-
+              {CONTACT_LINKS.map((item, idx) => (
+                <ContactBadge
+                  key={idx}
+                  item={item}
+                  onCopyEmail={handleCopyEmail}
+                  cardHoverProps={cardHoverProps}
+                />
+              ))}
             </div>
           </div>
 
@@ -2136,59 +1344,16 @@ export default function App() {
           <form 
             className="bento-card contact-bento-form" 
             onSubmit={handleSubmit}
-            onMouseMove={handleCardMouseMove}
-            onMouseLeave={handleCardMouseLeave}
+            {...cardHoverProps}
           >
-            
-            <div className="form-group">
-              <label className="form-label">Display Name *</label>
-              <input 
-                type="text" 
-                className="form-input" 
-                placeholder="Alex Mercer"
-                value={form.name}
-                onChange={(e) => setForm({...form, name: e.target.value})}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Email Node *</label>
-              <input 
-                type="email" 
-                className="form-input" 
-                placeholder="alex@enterprise.com"
-                value={form.email}
-                onChange={(e) => setForm({...form, email: e.target.value})}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Subject Specification</label>
-              <input 
-                type="text" 
-                className="form-input" 
-                placeholder="Next.js Contract Node integration"
-                value={form.subject}
-                onChange={(e) => setForm({...form, subject: e.target.value})}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Inquiry Core Details *</label>
-              <textarea 
-                className="form-textarea" 
-                placeholder="Provide parameters of required task scope..."
-                value={form.message}
-                onChange={(e) => setForm({...form, message: e.target.value})}
-                required
-              />
-            </div>
+            <FormField label="Display Name *" placeholder="Alex Mercer" value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} required />
+            <FormField label="Email Node *" type="email" placeholder="alex@enterprise.com" value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} required />
+            <FormField label="Subject Specification" placeholder="Next.js Contract Node integration" value={form.subject} onChange={(e) => setForm({...form, subject: e.target.value})} />
+            <FormField label="Inquiry Core Details *" placeholder="Provide parameters of required task scope..." value={form.message} onChange={(e) => setForm({...form, message: e.target.value})} required isTextarea />
 
             <button type="submit" className="btn-form-submit" disabled={isSubmitting}>
               <span>{isSubmitting ? 'Ingesting Secure Connection...' : 'Transmit Message Node'}</span>
-              <span className={isSubmitting ? 'pulse-spinner' : ''}>⚡</span>
+              <span className={isSubmitting ? 'pulse-spinner' : ''}>&#9889;</span>
             </button>
 
           </form>
@@ -2207,7 +1372,7 @@ export default function App() {
           <a href="mailto:shekhawatshivamsingh3@gmail.com" className="footer-social-btn">Email</a>
         </div>
         <p className="footer-copy">
-          © {new Date().getFullYear()} Shivam Singh Shekhawat. Structured with pixel-accuracy. All rights reserved.
+          &copy; {new Date().getFullYear()} Shivam Singh Shekhawat. Structured with pixel-accuracy. All rights reserved.
         </p>
       </footer>
 
@@ -2216,7 +1381,6 @@ export default function App() {
           ========================================== */}
       {selectedProject && (
         <>
-          {/* Overlay background dim blur */}
           <div className="case-study-overlay-backdrop" onClick={() => setSelectedProject(null)}></div>
           
           <div className={`case-study-drawer ${selectedProject ? 'open' : ''}`}>
@@ -2226,7 +1390,7 @@ export default function App() {
                 <div className="nav-logo-box">SS</div>
                 <span className="case-study-title">Case Study Specs</span>
               </div>
-              <button className="btn-close-case-study" onClick={() => setSelectedProject(null)}>✕</button>
+              <button className="btn-close-case-study" onClick={() => setSelectedProject(null)}>&#10005;</button>
             </div>
 
             <div className="case-study-content">
@@ -2238,11 +1402,10 @@ export default function App() {
                   <span className="project-tag">{selectedProject.date}</span>
                 </div>
                 
-                {/* Recruiting Verifiable Action Buttons */}
                 <div style={{display: 'flex', gap: '0.75rem', marginTop: '1.25rem', flexWrap: 'wrap'}}>
                   <a href={selectedProject.githubUrl} target="_blank" rel="noopener noreferrer" className="btn-cta-primary" style={{padding: '0.55rem 1.1rem', fontSize: '0.75rem', borderRadius: '4px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px'}}>
                     <span>Explore Source Registry</span>
-                    <span>↗</span>
+                    <span>&#8599;</span>
                   </a>
                 </div>
               </div>
@@ -2252,11 +1415,10 @@ export default function App() {
                 <p className="case-study-desc">{selectedProject.challenge}</p>
               </div>
 
-              {/* Dynamic SVG Architecture Diagram customized per project */}
               <div className="case-study-section">
                 <span className="case-study-section-title">2. System Architecture Flow</span>
                 <div className="architecture-diagram-svg">
-                  {renderArchitectureDiagram(selectedProject.id)}
+                  <ArchitectureDiagram projectId={selectedProject.id} />
                 </div>
               </div>
 
@@ -2291,7 +1453,7 @@ export default function App() {
       )}
 
       {/* Floating command center badge */}
-      <div className="floating-terminal-badge" onClick={() => setIsTerminalOpen(true)}>⌘</div>
+      <div className="floating-terminal-badge" onClick={() => setIsTerminalOpen(true)}>&#8984;</div>
 
       {/* Interactive Cursors */}
       <div className="custom-cursor" ref={cursorRef} aria-hidden="true"></div>
@@ -2308,7 +1470,7 @@ export default function App() {
                 <button className="terminal-dot-btn green"></button>
               </div>
               <span className="terminal-title-text">shivam@cyber-shell:~</span>
-              <button className="terminal-close-btn" onClick={() => setIsTerminalOpen(false)}>✕</button>
+              <button className="terminal-close-btn" onClick={() => setIsTerminalOpen(false)}>&#10005;</button>
             </div>
             <div className="terminal-body" ref={terminalBodyRef}>
               <div className="terminal-history">
