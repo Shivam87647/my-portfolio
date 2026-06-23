@@ -862,7 +862,11 @@ export default function App() {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setActiveSection('about');
-    window.history.pushState(null, null, ' ');
+    try {
+      window.history.pushState(null, null, ' ');
+    } catch (err) {
+      console.error('[Navigation] pushState failed:', err);
+    }
   };
 
   // GSAP Cinematic Reveal Animations
@@ -1005,8 +1009,16 @@ export default function App() {
   // Contact info clipboard pipeline
   const handleCopyEmail = (e) => {
     if (e) e.preventDefault();
-    navigator.clipboard.writeText('shekhawatshivamsingh3@gmail.com');
-    triggerToast('✦ Core email copied to clipboard registry!');
+    if (!navigator.clipboard) {
+      triggerToast('Clipboard access is not available in this browser.');
+      return;
+    }
+    navigator.clipboard.writeText('shekhawatshivamsingh3@gmail.com').then(() => {
+      triggerToast('✦ Core email copied to clipboard registry!');
+    }).catch((err) => {
+      console.error('[Clipboard] Failed to copy email:', err);
+      triggerToast('Failed to copy email. Please copy manually.');
+    });
   };
 
   // Contact form submission with high-end quantum-encryption ingest simulation
@@ -1075,7 +1087,12 @@ export default function App() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('[Canvas] Failed to get 2D rendering context for sphere canvas.');
+      return;
+    }
     const panel = visualPanelRef.current;
+    if (!panel) return;
 
     let width = (canvas.width = canvas.clientWidth);
     let height = (canvas.height = canvas.clientHeight);
@@ -1585,6 +1602,10 @@ export default function App() {
     const canvas = matrixCanvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('[Canvas] Failed to get 2D rendering context for matrix canvas.');
+      return;
+    }
 
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
@@ -1773,7 +1794,12 @@ export default function App() {
             onMouseLeave={handleCardMouseLeave}
           >
             <div className="visual-avatar-container">
-              <img src="/shivam.jpeg" alt="Shivam Singh Shekhawat" className="visual-avatar-img" />
+              <img
+                src="/shivam.jpeg"
+                alt="Shivam Singh Shekhawat"
+                className="visual-avatar-img"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
               <div className="avatar-glowing-pulse"></div>
             </div>
             
