@@ -2128,11 +2128,11 @@ export default function App() {
 
 
             <div className="form-group">
-              <label className="form-label">Display Name *</label>
+              <label className="form-label">Your Name *</label>
               <input 
                 type="text" 
                 className="form-input" 
-                placeholder="Alex Mercer"
+                placeholder="e.g. John Doe"
                 value={form.name}
                 onChange={(e) => setForm({...form, name: e.target.value})}
                 required
@@ -2140,11 +2140,11 @@ export default function App() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Email Node *</label>
+              <label className="form-label">Your Email *</label>
               <input 
                 type="email" 
                 className="form-input" 
-                placeholder="alex@enterprise.com"
+                placeholder="e.g. john@example.com"
                 value={form.email}
                 onChange={(e) => setForm({...form, email: e.target.value})}
                 required
@@ -2152,21 +2152,21 @@ export default function App() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Subject Specification</label>
+              <label className="form-label">Subject (Optional)</label>
               <input 
                 type="text" 
                 className="form-input" 
-                placeholder="Next.js Contract Node integration"
+                placeholder="e.g. Freelance Project Inquiry"
                 value={form.subject}
                 onChange={(e) => setForm({...form, subject: e.target.value})}
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Inquiry Core Details *</label>
+              <label className="form-label">Your Message *</label>
               <textarea 
                 className="form-textarea" 
-                placeholder="Provide parameters of required task scope..."
+                placeholder="How can I help you?"
                 value={form.message}
                 onChange={(e) => setForm({...form, message: e.target.value})}
                 required
@@ -2174,7 +2174,7 @@ export default function App() {
             </div>
 
             <button type="submit" className="btn-form-submit" disabled={isSubmitting}>
-              <span>{isSubmitting ? 'Ingesting Secure Connection...' : 'Transmit Message Node'}</span>
+              <span>{isSubmitting ? 'Sending Message...' : 'Send Message'}</span>
               <span className={isSubmitting ? 'pulse-spinner' : ''}>⚡</span>
             </button>
 
