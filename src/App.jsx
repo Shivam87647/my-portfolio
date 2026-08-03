@@ -651,7 +651,7 @@ export default function App() {
   const [isMatrixActive, setIsMatrixActive] = useState(false);
 
   // Form bindings
-  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '', botcheck: false });
 
   const canvasRef = useRef(null);
   const visualPanelRef = useRef(null);
@@ -958,21 +958,51 @@ export default function App() {
     triggerToast('✦ Core email copied to clipboard registry!');
   };
 
-  // Contact form submission with high-end quantum-encryption ingest simulation
-  const handleSubmit = (e) => {
+  // Contact form submission with Web3Forms integration
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) {
       triggerToast('Please complete all required contact details.');
       return;
     }
+    
+    // Spam bot honeypot trap
+    if (form.botcheck) return;
+
     setIsSubmitting(true);
     triggerToast('✦ Initiating secure quantum connection handshake...');
     
-    setTimeout(() => {
-      triggerToast(`[TRANSMISSION VERIFIED] Thanks ${form.name}! Shivam will initiate connection shortly.`);
-      setForm({ name: '', email: '', subject: '', message: '' });
+    try {
+      const payload = {
+        access_key: import.meta.env.VITE_WEB3FORMS_KEY || '58a53aad-08a3-47f3-baa8-f8e6781f6475',
+        name: form.name,
+        email: form.email,
+        subject: form.subject || 'New Contact Form Submission',
+        message: form.message
+      };
+
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        triggerToast(`[TRANSMISSION VERIFIED] Thanks ${form.name}! Shivam will initiate connection shortly.`);
+        setForm({ name: '', email: '', subject: '', message: '', botcheck: false });
+      } else {
+        triggerToast('[ERROR] Data ingestion failed. Please try again.');
+      }
+    } catch (error) {
+      triggerToast('[ERROR] Transmission intercepted or failed.');
+    } finally {
       setIsSubmitting(false);
-    }, 1800);
+    }
   };
 
   // 3D Card Hover Physics & Vercel-Style Border Spotlight Custom Properties
@@ -2086,6 +2116,17 @@ export default function App() {
             onMouseLeave={handleCardMouseLeave}
           >
             
+            {/* Honeypot for spam bots */}
+            <input 
+              type="checkbox" 
+              name="botcheck" 
+              className="hidden" 
+              style={{ display: 'none' }}
+              checked={form.botcheck}
+              onChange={(e) => setForm({...form, botcheck: e.target.checked})}
+            />
+
+
             <div className="form-group">
               <label className="form-label">Display Name *</label>
               <input 
