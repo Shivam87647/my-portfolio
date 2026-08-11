@@ -635,6 +635,7 @@ export default function App() {
 
   // Pure React Scroll & Sliding Active Indicator states
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHeroScrolled, setIsHeroScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('about');
   const [scrollProgress, setScrollProgress] = useState(0);
   const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 });
@@ -650,10 +651,11 @@ export default function App() {
   const [isMatrixActive, setIsMatrixActive] = useState(false);
 
   // Form bindings
-  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '', botcheck: false });
 
   const canvasRef = useRef(null);
   const visualPanelRef = useRef(null);
+  const sectionOffsetsRef = useRef([]);
   const cardRectsRef = useRef(new WeakMap());
   
   // Custom interactive refs
@@ -705,133 +707,109 @@ export default function App() {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  // Disable body scroll when case study drawer or terminal overlay is active to prevent scroll leak
+  // Disable body scroll when case study drawer is active to prevent scroll leak
   useEffect(() => {
-    const isLocked = selectedProject || isTerminalOpen;
-    if (isLocked) {
-      document.documentElement.style.overflow = 'hidden';
+    if (selectedProject) {
       document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = '8px'; // Prevents layout shift from scrollbar removal
+      document.body.style.paddingRight = '6px'; // Prevents layout shift from scrollbar removal
     } else {
-      document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
     }
     return () => {
-      document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
     };
-  }, [selectedProject, isTerminalOpen]);
+  }, [selectedProject]);
 
   // Pure React Header, Scrollspy, & Navigation Pill Interactions (100% jQuery-Free)
   useEffect(() => {
+    const cacheSectionOffsets = () => {
+      const sections = document.querySelectorAll('section[id]');
+      const offsets = [];
+      sections.forEach(sec => {
+        const rect = sec.getBoundingClientRect();
+        offsets.push({
+          id: sec.id,
+          top: rect.top + window.scrollY,
+          height: sec.offsetHeight
+        });
+      });
+      sectionOffsetsRef.current = offsets;
+    };
+
+    // Let page layout settle first
+    const initTimeout = setTimeout(cacheSectionOffsets, 1000);
+    window.addEventListener('resize', cacheSectionOffsets, { passive: true });
+
     const handleScroll = () => {
       const scrollTop = window.scrollY;
       
       // 1. Toggle scrolled navbar class
       setIsScrolled(scrollTop > 40);
+      setIsHeroScrolled(scrollTop > 100);
 
-      // 2. Scrollspy: Calculate which section occupies the viewport the most
-      const winHeight = window.innerHeight;
-      const navSectionIds = ['about', 'skills', 'projects', 'credentials', 'contact'];
+      // 2. Scrollspy: Use cached section coordinates
+      const scrollPosition = scrollTop + 160;
       let currentSectionId = '';
+      const cachedOffsets = sectionOffsetsRef.current;
+      const winHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
 
-      if (scrollTop < 80) {
-        currentSectionId = 'about';
-      } else {
-        let maxVisibleHeight = -1;
-        let bestSectionId = '';
+      for (let i = 0; i < cachedOffsets.length; i++) {
+        const sec = cachedOffsets[i];
+        if (scrollPosition >= sec.top && scrollPosition < sec.top + sec.height) {
+          currentSectionId = sec.id;
+          break;
+        }
+      }
 
-        navSectionIds.forEach(id => {
-          const sec = document.getElementById(id);
-          if (!sec) return;
-          const rect = sec.getBoundingClientRect();
-          
-          // Calculate intersection heights in the viewport
-          const visibleTop = Math.max(0, rect.top);
-          const visibleBottom = Math.min(winHeight, rect.bottom);
-          const visibleHeight = Math.max(0, visibleBottom - visibleTop);
-
-          if (visibleHeight > maxVisibleHeight) {
-            maxVisibleHeight = visibleHeight;
-            bestSectionId = id;
-          }
-        });
-
-        currentSectionId = bestSectionId || 'about';
+      if (scrollTop + winHeight >= docHeight - 80) {
+        currentSectionId = 'contact';
       }
 
       if (currentSectionId) {
         setActiveSection(currentSectionId);
       }
+
+      // 3. Scroll progress aligned to global document page scroll (100% layout-thrashing free)
+      const scrollableHeight = docHeight - winHeight;
+      const scrollPercent = scrollableHeight > 0 ? (scrollTop / scrollableHeight) * 100 : 0;
+      setScrollProgress(scrollPercent);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    // Trigger scroll immediately on load to set correct initial states
+    // Trigger scroll immediately on load
     const triggerTimeout = setTimeout(handleScroll, 100);
 
     return () => {
+      clearTimeout(initTimeout);
       clearTimeout(triggerTimeout);
+      window.removeEventListener('resize', cacheSectionOffsets);
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
-  // Slide sliding capsule pill & update scroll progress bar to align with active links
+  // Slide sliding capsule pill automatically when activeSection changes
   useEffect(() => {
     let activeId = activeSection;
     let rId;
-
     const updatePill = () => {
-      // If at the very top of the page (Hero section), reset indicators
-      if (window.scrollY < 100) {
-        setPillStyle(prev => ({ ...prev, opacity: 0 }));
-        setScrollProgress(0);
-        return;
-      }
-
       if (activeId === 'contact') {
         setPillStyle(prev => ({ ...prev, opacity: 0 }));
-        setScrollProgress(100);
         return;
       }
-
       const activeLink = document.querySelector(`.nav-links a[href="#${activeId}"]`);
-      const navbar = navbarRef.current;
-      
-      if (activeLink && navbar) {
-        // Slide capsule pill
+      if (activeLink) {
         setPillStyle({
           left: activeLink.offsetLeft,
           width: activeLink.offsetWidth,
           opacity: 1
         });
-
-        // Fill scroll progress bar exactly up to the right edge of the active link
-        const linkRect = activeLink.getBoundingClientRect();
-        const navRect = navbar.getBoundingClientRect();
-        const rightEdge = linkRect.right - navRect.left;
-        const progressPercent = Math.min(100, Math.max(0, (rightEdge / navRect.width) * 100));
-        setScrollProgress(progressPercent);
       }
     };
-
-    const handleResizeOrScroll = () => {
-      cancelAnimationFrame(rId);
-      rId = requestAnimationFrame(updatePill);
-    };
-
-    // Update initially
     rId = requestAnimationFrame(updatePill);
-
-    window.addEventListener('resize', handleResizeOrScroll, { passive: true });
-    window.addEventListener('scroll', handleResizeOrScroll, { passive: true });
-
-    return () => {
-      cancelAnimationFrame(rId);
-      window.removeEventListener('resize', handleResizeOrScroll);
-      window.removeEventListener('scroll', handleResizeOrScroll);
-    };
+    return () => cancelAnimationFrame(rId);
   }, [activeSection]);
 
   const handleNavLinkMouseEnter = (e) => {
@@ -868,89 +846,64 @@ export default function App() {
   // GSAP Cinematic Reveal Animations
   useEffect(() => {
     // Cinematic timeline with premium ease mappings
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out', duration: 1.4 } });
+    const tl = gsap.timeline({ defaults: { ease: 'power4.out', duration: 1.2 } });
 
     // Initial offsets to prevent layout shifting
-    gsap.set('.navbar-wrapper', { y: -60, opacity: 0 });
-    gsap.set('.hero-tagline', { y: 25, opacity: 0 });
-    gsap.set('.hero-main-title', { y: 35, opacity: 0 });
-    gsap.set('.hero-role-carousel', { y: 20, opacity: 0 });
-    gsap.set('.hero-desc', { y: 25, opacity: 0 });
-    gsap.set('.hero-ctas > *', { y: 25, opacity: 0 });
-    gsap.set('.visual-profile-card', { scale: 0.92, opacity: 0, rotationY: -8 });
+    gsap.set('.navbar-wrapper', { y: -100, opacity: 0 });
+    gsap.set('.hero-tagline', { y: 30, opacity: 0 });
+    gsap.set('.hero-title-inner', { y: '105%' });
+    gsap.set('.hero-role-carousel', { y: 25, opacity: 0 });
+    gsap.set('.hero-desc', { y: 30, opacity: 0 });
+    gsap.set('.hero-ctas > *', { y: 30, opacity: 0 });
+    gsap.set('.visual-profile-card', { scale: 0.85, opacity: 0, rotationY: -15 });
 
     // Cinematic execution flow
     tl.to('.navbar-wrapper', {
       y: 0,
       opacity: 1,
-      duration: 1.2
+      duration: 1
     })
     .to('.hero-tagline', {
       y: 0,
       opacity: 1,
-      duration: 0.95
-    }, '-=0.8')
-    .to('.hero-main-title', {
-      y: 0,
-      opacity: 1,
-      duration: 1.15
-    }, '-=0.85')
+      duration: 0.8
+    }, '-=0.5')
+    .to('.hero-title-inner', {
+      y: '0%',
+      duration: 1.1,
+      stagger: 0.15,
+      ease: 'power4.out'
+    }, '-=0.6')
     .to('.hero-role-carousel', {
       y: 0,
       opacity: 1,
-      duration: 0.95
-    }, '-=0.95')
+      duration: 0.8
+    }, '-=0.7')
     .to('.hero-desc', {
       y: 0,
       opacity: 1,
-      duration: 1.05
-    }, '-=0.85')
+      duration: 0.9
+    }, '-=0.6')
     .to('.hero-ctas > *', {
       y: 0,
       opacity: 1,
-      stagger: 0.12,
-      duration: 0.95
-    }, '-=0.9')
+      stagger: 0.15,
+      duration: 0.8
+    }, '-=0.7')
     .to('.visual-profile-card', {
       scale: 1,
       opacity: 1,
       rotationY: 0,
-      duration: 1.6,
-      ease: 'elastic.out(1, 0.85)'
-    }, '-=1.2');
+      duration: 1.5,
+      ease: 'elastic.out(1, 0.75)'
+    }, '-=1.1');
 
     // Scroll-triggered animations via dynamic IntersectionObserver + GSAP
     const observerOptions = {
       root: null,
-      threshold: 0.02,
-      rootMargin: '0px 0px -20px 0px'
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
     };
-
-    // Observe each portfolio container
-    const sections = document.querySelectorAll('section.section');
-
-    // Hide all scroll-triggered elements initially so they are completely sided/invisible
-    sections.forEach(sec => {
-      if (sec.classList.contains('hero-section')) return; // Skip hero section as it's animated by intro timeline
-      
-      const subtitle = sec.querySelector('.section-subtitle');
-      const title = sec.querySelector('.section-title');
-      const cards = sec.querySelectorAll('.bento-card, .glass-panel, .project-card-wrap, .credentials-grid > *, .contact-bento-layout > *');
-
-      if (subtitle) {
-        gsap.set(subtitle, { y: 25, opacity: 0 });
-      }
-      if (title) {
-        gsap.set(title, { y: 35, opacity: 0 });
-      }
-      if (cards.length) {
-        cards.forEach((card, idx) => {
-          // Alternate slide directions with subtle professional offset (60px)
-          const sideOffset = idx % 2 === 0 ? -60 : 60;
-          gsap.set(card, { x: sideOffset, opacity: 0, scale: 0.97 });
-        });
-      }
-    });
 
     const sectionObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -960,33 +913,29 @@ export default function App() {
           const title = section.querySelector('.section-title');
           const cards = section.querySelectorAll('.bento-card, .glass-panel, .project-card-wrap, .credentials-grid > *, .contact-bento-layout > *');
 
-          // Staggered reveal vectors coming from the sides
+          // Staggered reveal vectors
           if (subtitle) {
-            gsap.to(subtitle, { y: 0, opacity: 1, duration: 1.1, ease: 'power3.out' });
+            gsap.fromTo(subtitle, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: 'power4.out' });
           }
           if (title) {
-            gsap.to(title, { y: 0, opacity: 1, duration: 1.25, delay: 0.04, ease: 'power3.out' });
+            gsap.fromTo(title, { y: 25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.65, delay: 0.04, ease: 'power4.out' });
           }
           
           if (cards.length) {
-            gsap.to(cards, {
-              x: 0,
-              opacity: 1,
-              scale: 1,
-              duration: 1.25,
-              stagger: 0.12,
-              delay: 0.08,
-              ease: 'power3.out',
-              clearProps: 'transform,opacity' // Clears inline styles to let native hover transforms/opacities work!
-            });
+            gsap.fromTo(cards, 
+              { y: 50, opacity: 0, scale: 0.96, rotateX: 6, transformOrigin: 'top center' }, 
+              { y: 0, opacity: 1, scale: 1, rotateX: 0, duration: 1.0, stagger: 0.08, delay: 0.08, ease: 'power4.out', clearProps: 'transform' }
+            );
           }
 
           // Disconnect observer for this section once animated
-          sectionObserver.unobserve(section);
+          sectionObserver.unobserve(entry.target);
         }
       });
     }, observerOptions);
 
+    // Observe each portfolio container
+    const sections = document.querySelectorAll('section.section');
     sections.forEach(sec => {
       sectionObserver.observe(sec);
     });
@@ -1009,21 +958,51 @@ export default function App() {
     triggerToast('✦ Core email copied to clipboard registry!');
   };
 
-  // Contact form submission with high-end quantum-encryption ingest simulation
-  const handleSubmit = (e) => {
+  // Contact form submission with Web3Forms integration
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) {
       triggerToast('Please complete all required contact details.');
       return;
     }
+    
+    // Spam bot honeypot trap
+    if (form.botcheck) return;
+
     setIsSubmitting(true);
     triggerToast('✦ Initiating secure quantum connection handshake...');
     
-    setTimeout(() => {
-      triggerToast(`[TRANSMISSION VERIFIED] Thanks ${form.name}! Shivam will initiate connection shortly.`);
-      setForm({ name: '', email: '', subject: '', message: '' });
+    try {
+      const payload = {
+        access_key: import.meta.env.VITE_WEB3FORMS_KEY || '58a53aad-08a3-47f3-baa8-f8e6781f6475',
+        name: form.name,
+        email: form.email,
+        subject: form.subject || 'New Contact Form Submission',
+        message: form.message
+      };
+
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        triggerToast(`[TRANSMISSION VERIFIED] Thanks ${form.name}! Shivam will initiate connection shortly.`);
+        setForm({ name: '', email: '', subject: '', message: '', botcheck: false });
+      } else {
+        triggerToast('[ERROR] Data ingestion failed. Please try again.');
+      }
+    } catch (error) {
+      triggerToast('[ERROR] Transmission intercepted or failed.');
+    } finally {
       setIsSubmitting(false);
-    }, 1800);
+    }
   };
 
   // 3D Card Hover Physics & Vercel-Style Border Spotlight Custom Properties
@@ -1120,14 +1099,12 @@ export default function App() {
     let angleX = 0;
     let angleY = 0;
     let animId;
-    let isIntersecting = true;
 
     const fov = 320;
     const centerX = width / 2;
     const centerY = height / 2;
 
     const render = () => {
-      if (!isIntersecting) return;
       ctx.clearRect(0, 0, width, height);
 
       angleX += (targetRotX - angleX) * 0.07;
@@ -1201,28 +1178,11 @@ export default function App() {
       animId = requestAnimationFrame(render);
     };
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        isIntersecting = entry.isIntersecting;
-        if (isIntersecting) {
-          cancelAnimationFrame(animId);
-          animId = requestAnimationFrame(render);
-        }
-      });
-    }, { threshold: 0 });
-
-    if (panel) {
-      observer.observe(panel);
-    }
-
     render();
 
     return () => {
       window.removeEventListener('resize', handleResize);
       panel.removeEventListener('mousemove', handleMouseMove);
-      if (panel) {
-        observer.unobserve(panel);
-      }
       cancelAnimationFrame(animId);
     };
   }, []);
@@ -1243,17 +1203,18 @@ export default function App() {
     let magnetPageX = 0;
     let magnetPageY = 0;
 
+    // Inertia physics for 3D Cyber-Grid Parallax Depth
+    let targetTiltX = 0, targetTiltY = 0;
+    let currentTiltX = 0, currentTiltY = 0;
+
     const handleMove = (e) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
       cursor.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
 
-      // Parallax cyber grid tilt effect using cached reference!
-      if (grid) {
-        const tiltX = (e.clientX - window.innerWidth / 2) * 0.012;
-        const tiltY = (e.clientY - window.innerHeight / 2) * -0.012;
-        grid.style.transform = `perspective(1000px) rotateX(${60 + tiltY}deg) rotateY(${tiltX}deg) translate3d(0, 0, 0)`;
-      }
+      // Set target tilt angles based on mouse offset from center
+      targetTiltX = (e.clientX - window.innerWidth / 2) * 0.015;
+      targetTiltY = (e.clientY - window.innerHeight / 2) * -0.015;
     };
 
     const handleMouseDown = () => follower.classList.add('clicking');
@@ -1281,6 +1242,17 @@ export default function App() {
       }
 
       follower.style.transform = `translate3d(${followerX}px, ${followerY}px, 0)`;
+
+      // Luxurious smooth inertia cyber grid depth & scroll parallax
+      if (grid) {
+        currentTiltX += (targetTiltX - currentTiltX) * 0.06; // Soft inertia
+        currentTiltY += (targetTiltY - currentTiltY) * 0.06;
+        
+        // Translate the grid vertically based on scroll depth for extreme premium parallax
+        const scrollParallaxY = window.scrollY * 0.16;
+        grid.style.transform = `perspective(1000px) rotateX(${60 + currentTiltY}deg) rotateY(${currentTiltX}deg) translate3d(0, ${scrollParallaxY}px, 0)`;
+      }
+
       requestAnimationFrame(tick);
     };
     const animId = requestAnimationFrame(tick);
@@ -1655,13 +1627,13 @@ export default function App() {
 
         if (dx !== 0 || dy !== 0) {
           gsap.fromTo(card, 
-            { x: dx, y: dy, scale: 0.97 },
-            { x: 0, y: 0, scale: 1, duration: 0.75, ease: 'power3.out', clearProps: 'transform' }
+            { x: dx, y: dy, scale: 0.95 },
+            { x: 0, y: 0, scale: 1, duration: 0.65, ease: 'power4.out', clearProps: 'transform' }
           );
         } else {
           gsap.fromTo(card,
-            { scale: 0.92, opacity: 0 },
-            { scale: 1, opacity: 1, duration: 0.65, ease: 'power3.out', clearProps: 'transform' }
+            { scale: 0.75, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.55, ease: 'power3.out', clearProps: 'transform' }
           );
         }
       });
@@ -1731,8 +1703,12 @@ export default function App() {
           </div>
 
           <h1 className="hero-main-title">
-            Shivam Singh Shekhawat
-            <span className="editorial-title">Crafting Premium Digital Experiences</span>
+            <span className="hero-title-line">
+              <span className="hero-title-inner">Shivam Singh Shekhawat</span>
+            </span>
+            <span className="hero-title-line">
+              <span className="hero-title-inner editorial-title">Crafting Premium Digital Experiences</span>
+            </span>
           </h1>
 
           <div className="hero-role-carousel">
@@ -1765,7 +1741,7 @@ export default function App() {
 
         {/* Fluid Canvas Panel */}
         <div className="hero-visual-panel" ref={visualPanelRef}>
-          <canvas className="particles-canvas" ref={canvasRef} />
+          <canvas className={`particles-canvas ${isHeroScrolled ? 'expanded-bg' : ''}`} ref={canvasRef} />
           
           <div 
             className="visual-profile-card"
@@ -2140,12 +2116,23 @@ export default function App() {
             onMouseLeave={handleCardMouseLeave}
           >
             
+            {/* Honeypot for spam bots */}
+            <input 
+              type="checkbox" 
+              name="botcheck" 
+              className="hidden" 
+              style={{ display: 'none' }}
+              checked={form.botcheck}
+              onChange={(e) => setForm({...form, botcheck: e.target.checked})}
+            />
+
+
             <div className="form-group">
-              <label className="form-label">Display Name *</label>
+              <label className="form-label">Your Name *</label>
               <input 
                 type="text" 
                 className="form-input" 
-                placeholder="Alex Mercer"
+                placeholder="e.g. John Doe"
                 value={form.name}
                 onChange={(e) => setForm({...form, name: e.target.value})}
                 required
@@ -2153,11 +2140,11 @@ export default function App() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Email Node *</label>
+              <label className="form-label">Your Email *</label>
               <input 
                 type="email" 
                 className="form-input" 
-                placeholder="alex@enterprise.com"
+                placeholder="e.g. john@example.com"
                 value={form.email}
                 onChange={(e) => setForm({...form, email: e.target.value})}
                 required
@@ -2165,21 +2152,21 @@ export default function App() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Subject Specification</label>
+              <label className="form-label">Subject (Optional)</label>
               <input 
                 type="text" 
                 className="form-input" 
-                placeholder="Next.js Contract Node integration"
+                placeholder="e.g. Freelance Project Inquiry"
                 value={form.subject}
                 onChange={(e) => setForm({...form, subject: e.target.value})}
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Inquiry Core Details *</label>
+              <label className="form-label">Your Message *</label>
               <textarea 
                 className="form-textarea" 
-                placeholder="Provide parameters of required task scope..."
+                placeholder="How can I help you?"
                 value={form.message}
                 onChange={(e) => setForm({...form, message: e.target.value})}
                 required
@@ -2187,7 +2174,7 @@ export default function App() {
             </div>
 
             <button type="submit" className="btn-form-submit" disabled={isSubmitting}>
-              <span>{isSubmitting ? 'Ingesting Secure Connection...' : 'Transmit Message Node'}</span>
+              <span>{isSubmitting ? 'Sending Message...' : 'Send Message'}</span>
               <span className={isSubmitting ? 'pulse-spinner' : ''}>⚡</span>
             </button>
 
