@@ -1,1 +1,2 @@
 - **Dev Entry (2026-09-21 11:59:14)**: docs: add implementation notes and architectural details [#1]
+- **Dev Entry (2026-09-21 11:59:14)**: docs: update daily learning notes and references [#3]
